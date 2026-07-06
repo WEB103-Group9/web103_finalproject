@@ -23,7 +23,7 @@ Music fans often have to juggle multiple platforms to keep up with an artist. Fr
 
 ### Inspiration
 
-This project builds on ideas from several of our previous coursework projects. Multiple members of our group have worked on music-themed projects earlier in the course that explored artist/music reference content, vinyl and merch customization, and community-oriented spaces. **Sona** brings these ideas together into a single hub where fans can follow artists, engage with a community built around music, and shop artist merch.
+This project builds on ideas from several of our previous coursework projects. Multiple members of our group have worked on music-themed projects earlier in the course that explored artist/music reference content, vinyl and merch customization, and community-oriented spaces. **Sona** brings these ideas together into a single hub where fans can follow artists, engage with a community built around music, and shop artist merch. Furthermore, we take inspiration from existing platforms, such as Ticketmaster and Bandcamp, to build from. 
 
 ## Tech Stack
 
