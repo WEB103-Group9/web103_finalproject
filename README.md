@@ -71,15 +71,15 @@ Backend: Express, Node.js, PostgreSQL
 
 ### (Stretch) Spotify Connect
 
-Link a Spotify account to import playlists and generate personalized recommendations.
+- Link a Spotify account to import playlists and generate personalized recommendations.
 
-[gif goes here]
+- [gif goes here]
 
 ### (Stretch) Real Payment Integration
 
-Real checkout system built on top of the existing order system.
+- Real checkout system built on top of the existing order system.
 
-[gif goes here]
+- [gif goes here]
 
 ## Installation Instructions
 
