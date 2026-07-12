@@ -7,12 +7,12 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 [] Login Page
 [] Edit User Page
 [] Edit Artist_User Page
-⭐ Artist Directory
-⭐ Artist Directory but with a side-view panel
-⭐ Artist Detailed Page
-⭐ Merch Shop Page
-⭐ User's Profile Following Tab
-⭐ User's Profile Order History Tab
+- ⭐ Artist Directory
+- ⭐ Artist Directory but with a side-view panel
+- ⭐ Artist Detailed Page
+- ⭐ Merch Shop Page
+- ⭐ User's Profile Following Tab
+- ⭐ User's Profile Order History Tab
 [] Checkout Cart
 [] Error Page
 
