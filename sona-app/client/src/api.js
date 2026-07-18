@@ -29,3 +29,18 @@ export const deleteArtist = (id, userId) =>
   });
 
 export const getAdminOf = (userId) => request(`/users/${userId}/admin-of`);
+
+export const getFollowing = (userId) => request(`/users/${userId}/following`);
+
+export const followArtist = (userId, artistId, notify) =>
+  request(`/follows`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      notify_on_release: notify,
+    }),
+  });
+
+export const unfollowArtist = (userId, artistId) =>
+  request(`/follows/${artistId}?user_id=${userId}`, { method: "DELETE" });

@@ -139,3 +139,21 @@ h1 { font-size: 40px; margin: 8px 0 20px; }
 
 .edit-form { display: flex; flex-direction: column; gap: 10px; max-width: 460px; margin-bottom: 20px; }
 .edit-form input, .edit-form textarea { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+
+.titlebar-actions { display: flex; align-items: center; gap: 16px; }
+.titlebar-actions .admin-controls { margin: 0; }
+
+.notify { flex-basis: 100%; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text); }
+
+.tabs { display: flex; gap: 40px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.tab { padding: 8px 0; font-size: 17px; }
+.tab.active { color: var(--text-h); border-bottom: 2px solid var(--bar); font-weight: 600; }
+.tab.disabled { color: #aaa; cursor: not-allowed; }
+
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--bar); color: #fff;
+  padding: 10px 18px; border-radius: 6px;
+  font-size: 14px; z-index: 10;
+}

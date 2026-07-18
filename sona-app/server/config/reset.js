@@ -47,6 +47,7 @@ const createTables = `
   CREATE TABLE follows (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
+    notify_on_release BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY (user_id, artist_id)
   );

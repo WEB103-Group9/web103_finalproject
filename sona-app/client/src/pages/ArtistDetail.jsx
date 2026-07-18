@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import currentUser from "../currentUser.js";
-import { getArtist, getAdminOf, updateArtist, deleteArtist } from "../api.js";
+import { getArtist, getAdminOf, getFollowing, updateArtist, deleteArtist } from "../api.js";
+import FollowButton from "../components/FollowButton.jsx";
 
 function Social({ label, value }) {
   if (!value) return null;
@@ -24,6 +25,8 @@ export default function ArtistDetail() {
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [following, setFollowing] = useState(null);
+  const [notify, setNotify] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
 
@@ -37,9 +40,14 @@ export default function ArtistDetail() {
     getAdminOf(currentUser.id).then((administered) => {
       setIsAdmin(administered?.id === Number(id));
     });
+    getFollowing(currentUser.id).then((rows) => {
+      const match = rows.find((row) => row.id === Number(id));
+      setFollowing(Boolean(match));
+      setNotify(match?.notify_on_release ?? false);
+    });
   }, [id]);
 
-  if (!artist) return <p>Loading...</p>;
+  if (!artist || following === null) return <p>Loading...</p>;
 
   async function handleSave(event) {
     event.preventDefault();
@@ -66,12 +74,19 @@ export default function ArtistDetail() {
           {artist.genre && <span className="genre-tag">{artist.genre}</span>}
         </div>
 
-        {isAdmin && !editing && (
-          <div className="admin-controls">
-            <button type="button" onClick={() => setEditing(true)}>Edit</button>
-            <button type="button" onClick={handleDelete} className="btn-danger">Delete</button>
-          </div>
-        )}
+        <div className="titlebar-actions">
+          <FollowButton
+            artistId={artist.id}
+            initialFollowing={following}
+            initialNotify={notify}
+          />
+          {isAdmin && !editing && (
+            <div className="admin-controls">
+              <button type="button" onClick={() => setEditing(true)}>Edit</button>
+              <button type="button" onClick={handleDelete} className="btn-danger">Delete</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isAdmin && editing && (

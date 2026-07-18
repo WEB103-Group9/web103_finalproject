@@ -5,7 +5,10 @@ function App() {
     <>
       <nav className="nav">
         <Link to="/" className="brand">Sona</Link>
-        <span className="cart">🛒</span>
+        <div className="nav-right">
+          <Link to="/profile">Profile</Link>
+          <span className="cart">🛒</span>
+        </div>
       </nav>
       <main className="container">
         <Outlet />
