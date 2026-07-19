@@ -173,4 +173,26 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.get("/:id/posts", async (req, res) => {
+  const {id} = req.params;
+
+  try {
+    const postResult = await pool.query(
+      `SELECT artists.id,
+              artists.name,
+              posts.content,
+              posts.created_at AS posted_on
+      FROM artists
+      JOIN posts ON artists.id = posts.artist_id
+      WHERE artist_id = $1
+      ORDER BY posts.created_at DESC`,
+      [id]
+    )
+    res.json(postResult.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+})
+
 export default router;

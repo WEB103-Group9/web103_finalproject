@@ -44,3 +44,5 @@ export const followArtist = (userId, artistId, notify) =>
 
 export const unfollowArtist = (userId, artistId) =>
   request(`/follows/${artistId}?user_id=${userId}`, { method: "DELETE" });
+
+export const getPosts = (artistId) => request(`/artists/${artistId}/posts`)
