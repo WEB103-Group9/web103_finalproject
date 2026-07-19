@@ -29,7 +29,13 @@ router.get("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT * FROM artists ${where} ORDER BY name`,
+      `SELECT artists.*,
+              profile.description, profile.instagram, profile.twitter,
+              profile.facebook, profile.tiktok, profile.spotify
+       FROM artists
+       LEFT JOIN profile ON profile.artist_id = artists.id
+       ${where}
+       ORDER BY artists.name`,
       values,
     );
     res.json(result.rows);
