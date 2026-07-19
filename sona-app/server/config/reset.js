@@ -3,6 +3,7 @@ import pool from "./database.js";
 const dropTables = `
   DROP TABLE IF EXISTS posts;
   DROP TABLE IF EXISTS follows;
+  DROP TABLE IF EXISTS merch;
   DROP TABLE IF EXISTS admin;
   DROP TABLE IF EXISTS profile;
   DROP TABLE IF EXISTS artists;
@@ -22,6 +23,17 @@ const createTables = `
     name VARCHAR(100) NOT NULL,
     genre VARCHAR(50),
     photo VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE merch (
+    id SERIAL PRIMARY KEY,
+    artist_id INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    photo VARCHAR(255),
+    stock INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT NOW()
   );
 
@@ -86,6 +98,18 @@ async function seed() {
       RETURNING id, name;
     `);
     const [artist1, artist2, artist3] = artists.rows;
+
+    console.log("Seeding merch...");
+    await client.query(
+      `INSERT INTO merch (artist_id, name, type, price, photo, stock) VALUES
+    ($1, 'Tour T-Shirt', 'apparel', 25.00, 'https://picsum.photos/seed/merch1/400/400', 50),
+    ($1, 'Vinyl Record', 'music', 30.00, 'https://picsum.photos/seed/merch2/400/400', 20),
+    ($2, 'Hoodie', 'apparel', 45.00, 'https://picsum.photos/seed/merch3/400/400', 30),
+    ($2, 'Poster', 'accessory', 15.00, 'https://picsum.photos/seed/merch4/400/400', 100),
+    ($3, 'Snapback Hat', 'apparel', 28.00, 'https://picsum.photos/seed/merch5/400/400', 40)
+  `,
+      [artist1.id, artist2.id, artist3.id],
+    );
 
     console.log("Seeding profiles...");
     await client.query(
