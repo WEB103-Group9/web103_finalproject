@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getArtists, getFollowing } from "../api.js";
 import currentUser from "../currentUser.js";
 import ArtistCard from "../components/ArtistCard.jsx";
+import QuickViewPanel from "../components/QuickViewPanel.jsx";
 
 const GENRES = ["Pop", "Rock", "Hip-Hop"];
 
@@ -12,6 +13,7 @@ export default function Directory() {
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -62,12 +64,18 @@ export default function Directory() {
             <ArtistCard
               key={artist.id}
               artist={artist}
+              onQuickView={() => setSelectedArtist(artist)}
               initialFollowing={followMap[artist.id]?.following ?? false}
               initialNotify={followMap[artist.id]?.notify ?? false}
             />
           ))}
         </div>
       )}
+      
+      <QuickViewPanel
+        artist={selectedArtist}
+        onClose={() => setSelectedArtist(null)}
+      />
     </section>
   );
 }
