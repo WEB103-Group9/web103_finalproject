@@ -14,7 +14,7 @@ app.use(express.json());
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 app.use("/api/artists", artistsRouter);
 app.use("/api/users", usersRouter);
-app.use("api/merch", merchRouter);
+app.use("/api/merch", merchRouter);
 
 app.listen(PORT, () => {
   console.log(`Sona server running on http://localhost:${PORT}`);

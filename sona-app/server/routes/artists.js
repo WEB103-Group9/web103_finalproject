@@ -39,6 +39,44 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/artists/:id/merch
+router.get('/:id/merch', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM merch WHERE artist_id = $1 ORDER BY created_at DESC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch artist merch' });
+  }
+});
+
+// POST /api/artists/:id/merch
+router.post('/:id/merch', async (req, res) => {
+  try {
+    const artistId = req.params.id;
+    const authorized = await isAdminOf(req.user.id, artistId);
+    if (!authorized) return res.status(403).json({ error: 'Not authorized' });
+
+    const { name, type, price, photo, stock } = req.body;
+    if (!name || !type || price === undefined) {
+      return res.status(400).json({ error: 'name, type, and price are required' });
+    }
+
+    const { rows } = await pool.query(
+      `INSERT INTO merch (artist_id, name, type, price, photo, stock)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [artistId, name, type, price, photo, stock ?? 0]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create merch' });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
