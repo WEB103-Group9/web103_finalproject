@@ -171,3 +171,9 @@ h1 { font-size: 40px; margin: 8px 0 20px; }
   font-size: 0.75rem;
   margin: 0;
 }
+
+.posts-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

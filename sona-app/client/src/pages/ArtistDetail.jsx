@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import currentUser from "../currentUser.js";
 import { getArtist, getAdminOf, getFollowing, updateArtist, deleteArtist, getPostsByArtist } from "../api.js";
@@ -32,6 +32,10 @@ export default function ArtistDetail() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [posts, setPosts] = useState({})
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [toast, setToast] = useState("")
+
+  let new_post = (searchParams.get('new_post') === "true")
 
   useEffect(() => {
     getArtist(id).then((data) => {
@@ -53,7 +57,16 @@ export default function ArtistDetail() {
   useEffect(() => {
     getPostsByArtist(id).then(setPosts);
   }, [id]);
-console.log(posts)
+
+    useEffect(() => {
+    if (new_post) {
+      showToast("Post published");
+      const params = new URLSearchParams(searchParams);
+      params.delete("new_post");
+      setSearchParams(params, { replace: true });
+    }
+  }, [new_post, searchParams, setSearchParams]);
+
   if (!artist || following === null) return <p>Loading...</p>;
 
   async function handleSave(event) {
@@ -67,6 +80,11 @@ console.log(posts)
     if (!confirm(`Delete ${artist.name}?`)) return;
     await deleteArtist(id, currentUser.id);
     navigate("/");
+  }
+
+  function showToast(message) {
+    setToast(message);
+    setTimeout(() => setToast(""), 2000);
   }
 
   return (
@@ -152,7 +170,7 @@ console.log(posts)
       <section>
         <div className="posts-titlebar">
           <h2>Posts</h2>
-          <Link role="button" to={`/posts/create?artist=${artist.id}`}>Create</Link>
+          <Link className="btn" role="button" to={`/posts/create?artist=${artist.id}`}>Create</Link>
         </div>
         <div className="grid">
           {posts.map((post) => (
@@ -168,6 +186,9 @@ console.log(posts)
         </div>
         <p className="placeholder">Merch cards — coming soon (Issue 6)</p>
       </section>
+
+            {toast && <span className="toast">{toast}</span>}
+
     </article>
   );
 }
