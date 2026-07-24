@@ -5,12 +5,18 @@ function App() {
   return (
     <>
       <nav className="nav">
-        <Link to="/" className="brand">
-          <img src={logo} alt="Sona" className="brand-logo" />
-        </Link>
-        <div className="nav-right">
-          <Link to="/profile">Profile</Link>
-          <span className="cart">🛒</span>
+        <div className="nav-inner">
+          <Link to="/" className="brand">
+            <img
+              src={logo}
+              alt="Sona — Artist + Fan Hub"
+              className="brand-logo"
+            />
+          </Link>
+          <div className="nav-right">
+            <Link to="/profile">Profile</Link>
+            <span className="cart">🛒</span>
+          </div>
         </div>
       </nav>
       <main className="container">

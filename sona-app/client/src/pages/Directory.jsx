@@ -4,23 +4,29 @@ import currentUser from "../currentUser.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
 
-const GENRES = ["Pop", "Rock", "Hip-Hop"];
-
 export default function Directory() {
   const [artists, setArtists] = useState([]);
   const [followMap, setFollowMap] = useState({});
   const [followLoaded, setFollowLoaded] = useState(false);
   const [q, setQ] = useState("");
-  const [genre, setGenre] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [genreOptions, setGenreOptions] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedArtist, setSelectedArtist] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getArtists().then((all) => {
+      const unique = [...new Set(all.map((a) => a.genre).filter(Boolean))];
+      setGenreOptions(unique);
+    });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
-    getArtists({ q, genre })
+    getArtists({ q, genre: selectedGenre })
       .then(setArtists)
       .finally(() => setLoading(false));
-  }, [q, genre]);
+  }, [q, selectedGenre]);
 
   useEffect(() => {
     getFollowing(currentUser.id).then((rows) => {
@@ -46,10 +52,15 @@ export default function Directory() {
           value={q}
           onChange={(event) => setQ(event.target.value)}
         />
-        <select value={genre} onChange={(event) => setGenre(event.target.value)}>
+        <select
+          value={selectedGenre}
+          onChange={(event) => setSelectedGenre(event.target.value)}
+        >
           <option value="">Genre Dropdown</option>
-          {GENRES.map((option) => (
-            <option key={option} value={option}>{option}</option>
+          {genreOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
           ))}
         </select>
       </div>
@@ -71,7 +82,7 @@ export default function Directory() {
           ))}
         </div>
       )}
-      
+
       <QuickViewPanel
         artist={selectedArtist}
         onClose={() => setSelectedArtist(null)}

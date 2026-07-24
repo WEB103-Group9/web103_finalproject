@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import FollowButton from "./FollowButton.jsx";
-import './ArtistCard.css';
 
 export default function ArtistCard({
   artist,
@@ -18,7 +17,7 @@ export default function ArtistCard({
       {artist.genre && <span className="genre-tag">{artist.genre}</span>}
 
       <div className="card-actions">
-        <button className="btn-secondary" onClick={onQuickView}>
+        <button className="btn-outline" onClick={onQuickView}>
           Quick View
         </button>
         <FollowButton

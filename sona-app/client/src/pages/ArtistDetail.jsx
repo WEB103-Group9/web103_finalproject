@@ -2,13 +2,24 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import currentUser from "../currentUser.js";
-import { getArtist, getAdminOf, getFollowing, updateArtist, deleteArtist, getPostsByArtist } from "../api.js";
+import {
+  getArtist,
+  getAdminOf,
+  getFollowing,
+  updateArtist,
+  deleteArtist,
+  getPostsByArtist,
+} from "../api.js";
 import FollowButton from "../components/FollowButton.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 
 function Social({ label, value }) {
   if (!value) return null;
-  return <span className="social" title={value}>{label}</span>;
+  return (
+    <span className="social" title={value}>
+      {label}
+    </span>
+  );
 }
 
 const EDITABLE = [
@@ -26,16 +37,16 @@ export default function ArtistDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [following, setFollowing] = useState(null);
   const [notify, setNotify] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
-  const [posts, setPosts] = useState({})
+  const [posts, setPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [toast, setToast] = useState("")
+  const [toast, setToast] = useState("");
 
-  let new_post = (searchParams.get('new_post') === "true")
+  let new_post = searchParams.get("new_post") === "true";
 
   useEffect(() => {
     getArtist(id).then((data) => {
@@ -58,7 +69,7 @@ export default function ArtistDetail() {
     getPostsByArtist(id).then(setPosts);
   }, [id]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (new_post) {
       showToast("Post published");
       const params = new URLSearchParams(searchParams);
@@ -71,7 +82,10 @@ export default function ArtistDetail() {
 
   async function handleSave(event) {
     event.preventDefault();
-    const updated = await updateArtist(id, { ...form, user_id: currentUser.id });
+    const updated = await updateArtist(id, {
+      ...form,
+      user_id: currentUser.id,
+    });
     setArtist((prev) => ({ ...prev, ...updated, ...form }));
     setEditing(false);
   }
@@ -100,15 +114,29 @@ export default function ArtistDetail() {
         </div>
 
         <div className="titlebar-actions">
-          <FollowButton
-            artistId={artist.id}
-            initialFollowing={following}
-            initialNotify={notify}
-          />
+          {!isAdmin && (
+            <FollowButton
+              artistId={artist.id}
+              initialFollowing={following}
+              initialNotify={notify}
+            />
+          )}
           {isAdmin && !editing && (
             <div className="admin-controls">
-              <button type="button" onClick={() => setEditing(true)}>Edit</button>
-              <button type="button" onClick={handleDelete} className="btn-danger">Delete</button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setEditing(true)}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="btn-danger"
+              >
+                Delete
+              </button>
             </div>
           )}
         </div>
@@ -134,8 +162,16 @@ export default function ArtistDetail() {
             ),
           )}
           <div className="admin-controls">
-            <button type="submit">Save</button>
-            <button type="button" onClick={() => setEditing(false)}>Cancel</button>
+            <button type="submit" className="btn">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn-outline"
+              onClick={() => setEditing(false)}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       )}
@@ -148,12 +184,17 @@ export default function ArtistDetail() {
           <div className="social-row">
             <Social label="IG" value={artist.instagram} />
             <Social label="X" value={artist.twitter} />
-            <Social label="f" value={artist.facebook} />
+            <Social label="FB" value={artist.facebook} />
             <Social label="TT" value={artist.tiktok} />
           </div>
 
           {artist.spotify ? (
-            <a href={artist.spotify} target="_blank" rel="noreferrer" className="spotify-embed">
+            <a
+              href={artist.spotify}
+              target="_blank"
+              rel="noreferrer"
+              className="spotify-embed"
+            >
               Open on Spotify
             </a>
           ) : (
@@ -170,11 +211,19 @@ export default function ArtistDetail() {
       <section>
         <div className="posts-titlebar">
           <h2>Posts</h2>
-          <Link className="btn" role="button" to={`/posts/create?artist=${artist.id}`}>Create</Link>
+          {isAdmin && (
+            <Link
+              className="btn"
+              role="button"
+              to={`/posts/create?artist=${artist.id}`}
+            >
+              Create
+            </Link>
+          )}
         </div>
         <div className="grid">
           {posts.map((post) => (
-          <ArtistPost postDetails={post}></ArtistPost>
+            <ArtistPost key={post.id} postDetails={post} isAdmin={isAdmin} />
           ))}
         </div>
       </section>
@@ -187,8 +236,7 @@ export default function ArtistDetail() {
         <p className="placeholder">Merch cards — coming soon (Issue 6)</p>
       </section>
 
-            {toast && <span className="toast">{toast}</span>}
-
+      {toast && <span className="toast">{toast}</span>}
     </article>
   );
 }

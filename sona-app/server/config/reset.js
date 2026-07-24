@@ -73,7 +73,7 @@ async function seed() {
     const users = await client.query(`
       INSERT INTO users (username, role) VALUES
         ('testfan', 'fan'),
-        ('testadmin', 'artist_admin')
+        ('testadmin', 'artist')
       RETURNING id, username, role;
     `);
     const [fan, testAdmin] = users.rows;
@@ -83,19 +83,36 @@ async function seed() {
       INSERT INTO artists (name, genre, photo) VALUES
         ('Test Artist 1', 'Pop', 'https://picsum.photos/seed/artist1/400/400'),
         ('Test Artist 2', 'Rock', 'https://picsum.photos/seed/artist2/400/400'),
-        ('Test Artist 3', 'Hip-Hop', 'https://picsum.photos/seed/artist3/400/400')
+        ('Test Artist 3', 'Hip-Hop', 'https://picsum.photos/seed/artist3/400/400'),
+        ('Test Artist 4', 'R&B', 'https://picsum.photos/seed/artist4/400/400'),
+        ('Test Artist 5', 'Indie', 'https://picsum.photos/seed/artist5/400/400'),
+        ('Test Artist 6', 'Electronic', 'https://picsum.photos/seed/artist6/400/400'),
+        ('Test Artist 7', 'Jazz', 'https://picsum.photos/seed/artist7/400/400')
       RETURNING id, name;
     `);
-    const [artist1, artist2, artist3] = artists.rows;
+    const [artist1, artist2, artist3, artist4, artist5, artist6, artist7] =
+      artists.rows;
 
     console.log("Seeding profiles...");
     await client.query(
-      `INSERT INTO profile (artist_id, description, instagram, twitter, spotify) VALUES
-        ($1, 'Placeholder bio for Test Artist 1.', '@testartist1', '@testartist1', 'https://open.spotify.com/artist/example1'),
-        ($2, 'Placeholder bio for Test Artist 2.', '@testartist2', '@testartist2', 'https://open.spotify.com/artist/example2'),
-        ($3, 'Placeholder bio for Test Artist 3.', '@testartist3', '@testartist3', 'https://open.spotify.com/artist/example3')
+      `INSERT INTO profile (artist_id, description, instagram, twitter, facebook, tiktok, spotify) VALUES
+  ($1, 'Placeholder bio for Test Artist 1.', '@testartist1', '@testartist1', '@testartist1fb', '@testartist1tt', 'https://open.spotify.com/artist/example1'),
+  ($2, 'Placeholder bio for Test Artist 2.', '@testartist2', '@testartist2', '@testartist2fb', '@testartist2tt', 'https://open.spotify.com/artist/example2'),
+  ($3, 'Placeholder bio for Test Artist 3.', '@testartist3', '@testartist3', '@testartist3fb', '@testartist3tt', 'https://open.spotify.com/artist/example3'),
+  ($4, 'Placeholder bio for Test Artist 4.', '@testartist4', '@testartist4', '@testartist4fb', '@testartist4tt', 'https://open.spotify.com/artist/example4'),
+  ($5, 'Placeholder bio for Test Artist 5.', '@testartist5', '@testartist5', '@testartist5fb', '@testartist5tt', 'https://open.spotify.com/artist/example5'),
+  ($6, 'Placeholder bio for Test Artist 6.', '@testartist6', '@testartist6', '@testartist6fb', '@testartist6tt', 'https://open.spotify.com/artist/example6'),
+  ($7, 'Placeholder bio for Test Artist 7.', '@testartist7', '@testartist7', '@testartist7fb', '@testartist7tt', 'https://open.spotify.com/artist/example7')
       `,
-      [artist1.id, artist2.id, artist3.id],
+      [
+        artist1.id,
+        artist2.id,
+        artist3.id,
+        artist4.id,
+        artist5.id,
+        artist6.id,
+        artist7.id,
+      ],
     );
 
     console.log("Seeding admin link...");
@@ -106,17 +123,18 @@ async function seed() {
 
     console.log("Seeding follows...");
     await client.query(
-      `INSERT INTO follows (user_id, artist_id) VALUES ($1, $2), ($1, $3)`,
-      [fan.id, artist1.id, artist3.id],
+      `INSERT INTO follows (user_id, artist_id) VALUES ($1, $2), ($1, $3), ($1, $4)`,
+      [fan.id, artist1.id, artist3.id, artist5.id],
     );
 
     console.log("Seeding posts...");
     await client.query(
       `INSERT INTO posts (artist_id, content) VALUES
         ($1, 'Placeholder post from Test Artist 1.'),
-        ($2, 'Placeholder post from Test Artist 2.')
+        ($2, 'Placeholder post from Test Artist 2.'),
+        ($3, 'Placeholder post from Test Artist 3.')
       `,
-      [artist1.id, artist2.id],
+      [artist1.id, artist2.id, artist4.id],
     );
 
     console.log("✅ Database reset and seeded successfully.");

@@ -2,7 +2,11 @@ import { useState } from "react";
 import currentUser from "../currentUser.js";
 import { followArtist, unfollowArtist } from "../api.js";
 
-export default function FollowButton({ artistId, initialFollowing, initialNotify }) {
+export default function FollowButton({
+  artistId,
+  initialFollowing,
+  initialNotify,
+}) {
   const [following, setFollowing] = useState(initialFollowing);
   const [notify, setNotify] = useState(initialNotify);
   const [toast, setToast] = useState("");
@@ -40,7 +44,7 @@ export default function FollowButton({ artistId, initialFollowing, initialNotify
       <button
         type="button"
         onClick={toggleFollow}
-        className={following ? "btn-outline" : "btn"}
+        className={following ? "btn-unfollow" : "btn-follow"}
       >
         {following ? "Unfollow" : "Follow"}
       </button>
