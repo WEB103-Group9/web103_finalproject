@@ -139,3 +139,9 @@ h1 { font-size: 40px; margin: 8px 0 20px; }
 
 .edit-form { display: flex; flex-direction: column; gap: 10px; max-width: 460px; margin-bottom: 20px; }
 .edit-form input, .edit-form textarea { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}

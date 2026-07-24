@@ -29,3 +29,26 @@ export const deleteArtist = (id, userId) =>
   });
 
 export const getAdminOf = (userId) => request(`/users/${userId}/admin-of`);
+
+export const getMerch = ({ artist_id = "", type = "", sort = "" } = {}) => {
+  const params = new URLSearchParams();
+  if (artist_id) params.set("artist_id", artist_id);
+  if (type) params.set("type", type);
+  if (sort) params.set("sort", sort);
+  const qs = params.toString();
+  return request(`/merch${qs ? `?${qs}` : ""}`);
+};
+
+export const getArtistMerch = (artistId) => request(`/artists/${artistId}/merch`);
+
+export const createMerch = (artistId, data) =>
+  request(`/artists/${artistId}/merch`, { method: "POST", body: JSON.stringify(data) });
+
+export const updateMerch = (id, data) =>
+  request(`/merch/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+
+export const deleteMerch = (id, userId) =>
+  request(`/merch/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify({ user_id: userId }),
+  });
