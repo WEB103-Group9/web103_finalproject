@@ -56,7 +56,8 @@ export default function Cart() {
     };
 
     try {
-        
+        // Custom feature: one Place Order action automatically creates 
+        // the order and all related order_items database records.
         await createOrder(orderData);
 
         setSuccessMessage("Your order was placed successfully.");
