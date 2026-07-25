@@ -40,21 +40,21 @@ export async function syncArtistConcerts() {
         const attractionId = await getAttractionId(artist.name);
         // console.log(attractionId)
         if (attractionId != null) {
-            const concerts = await getConcerts(attractionId);
-            for (const concert of concerts) {
-                const venueInfo = concert._embedded.venues[0];
-                const venueName = venueInfo.name;
-                const city = venueInfo.city.name;
-                const date = concert.dates.start.localDate;
-                const ticketLink = concert.url;
+          const concerts = await getConcerts(attractionId);
+          for (const concert of concerts) {
+            const venueInfo = concert._embedded.venues[0];
+            const venueName = venueInfo.name;
+            const city = venueInfo.city.name;
+            const date = concert.dates.start.localDate;
+            const ticketLink = concert.url;
 
-                await pool.query(
-                    `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source) VALUES
-                        ($1, $2, $3, $4, $5, 'api')
-                    `,
-                    [artist.id, venueName, city, date, ticketLink],
-                )
-            }
+            await pool.query(
+              `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
+                VALUES ($1, $2, $3, $4, $5, 'api')
+              `,
+              [artist.id, venueName, city, date, ticketLink],
+            )
+          }
         }
     } catch (err) {
         console.error(`Failed to find concerts for ${artist.name}:`, err);
