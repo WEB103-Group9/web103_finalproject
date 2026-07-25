@@ -1,6 +1,8 @@
 import pool from "./database.js";
 
 const dropTables = `
+  DROP TABLE IF EXISTS order_items CASCADE;
+  DROP TABLE IF EXISTS orders CASCADE;
   DROP TABLE IF EXISTS posts CASCADE;
   DROP TABLE IF EXISTS follows CASCADE;
   DROP TABLE IF EXISTS merch CASCADE;
@@ -70,6 +72,21 @@ const createTables = `
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    merch_id INTEGER NOT NULL REFERENCES merch(id),
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    price NUMERIC(10,2) NOT NULL CHECK (price >= 0)
+  );
+
 `;
 
 async function seed() {
