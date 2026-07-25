@@ -40,4 +40,70 @@ router.get("/:id/following", async (req, res) => {
   }
 });
 
+router.get("/:id/orders", async(req, res)=>{
+  const userId = Number(req.params.id)
+
+  if(!Number.isInteger(userId) || userId <= 0){
+    return res.status(400).json({
+      error: "A valid user ID is required",
+    });
+  }
+
+  try{
+    const userResult = await pool.query(
+      `SELECT id FROM users
+      WHERE id = $1`,[userId]
+    );
+
+    if(userResult.rows.length === 0){
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+     const result = await pool.query(
+      `SELECT
+         orders.id,
+         orders.user_id,
+         orders.total,
+         orders.created_at,
+         COALESCE(
+           json_agg(
+             json_build_object(
+               'id', order_items.id,
+               'merch_id', merch.id,
+               'name', merch.name,
+               'photo', merch.photo,
+               'quantity', order_items.quantity,
+               'price', order_items.price
+             )
+             ORDER BY order_items.id
+           ) FILTER (WHERE order_items.id IS NOT NULL),
+           '[]'::json
+         ) AS items
+       FROM orders
+       LEFT JOIN order_items
+         ON order_items.order_id = orders.id
+       LEFT JOIN merch
+         ON merch.id = order_items.merch_id
+       WHERE orders.user_id = $1
+       GROUP BY orders.id
+       ORDER BY orders.created_at DESC`,
+      [userId],
+    );
+    res.json(result.rows);
+
+
+  } catch(err){
+    console.error("Failed to fetch order history:", err)
+
+    res.status(500).json({
+      error: "Failed to fetch order history",
+    });
+  }
+
+
+
+})
+
 export default router;
