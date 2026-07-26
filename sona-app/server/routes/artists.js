@@ -225,8 +225,9 @@ router.get("/:id/posts", async (req, res) => {
 
   try {
     const postResult = await pool.query(
-      `SELECT artists.id,
-              artists.name,
+      `SELECT posts.id AS post_id,
+              artists.id AS artist_id,
+              artists.name AS artist_name,
               posts.content,
               posts.created_at AS posted_on
       FROM artists
