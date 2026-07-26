@@ -8,7 +8,7 @@ export default function PostEditForm() {
   const { id } = useParams();
   const [post, setPost] = useState({
     id: 0,
-    name: "",
+    artist_name: "",
     artist_id: 0,
     content: "",
     posted_on: null,
@@ -37,7 +37,7 @@ export default function PostEditForm() {
   return (
     <div>
       <div className="detail-titlebar">
-        <h1>{post.name}</h1>
+        <h1>{post.artist_name}</h1>
       </div>
       <h2>Edit Post</h2>
       <form onSubmit={handleSubmit} className="edit-form">

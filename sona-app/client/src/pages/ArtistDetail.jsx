@@ -237,9 +237,12 @@ export default function ArtistDetail() {
           )}
         </div>
         <div className="grid">
-          {posts.map((post) => (
-            <ArtistPost key={post.id} postDetails={post} isAdmin={isAdmin} />
-          ))}
+          {posts.length > 0 ?
+            (posts.map((post) => (
+              <ArtistPost key={post.id} postDetails={post} isAdmin={isAdmin} />
+            ))) :
+            (<p className="placeholder">No posts yet.</p>)
+          }
         </div>
       </section>
 
