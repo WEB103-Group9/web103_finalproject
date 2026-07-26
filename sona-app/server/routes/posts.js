@@ -63,7 +63,7 @@ router.delete("/:id", async (req, res) => {
   if (!(await isAdminOf(user_id, artist_id))) {
     return res
       .status(403)
-      .json({ error: "Not authorized to delete a post this artist" });
+      .json({ error: "Not authorized to delete a post for this artist" });
   }
 
   try {
