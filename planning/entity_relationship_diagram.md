@@ -12,7 +12,8 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 6. concerts
 7. merch
 8. albums
-9. purchases
+9. orders
+10. order_items
 
 ## Add the Entity Relationship Diagram
 

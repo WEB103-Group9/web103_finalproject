@@ -56,11 +56,11 @@ Artist Admins can post updates like new merch drops, show announcements, news, e
 
 - ![Artist Quick-View Panel](https://i.imgur.com/8dW0ZTp.gif)
 
-### Merch Shop with Filtering
+### ✅ Merch Shop with Filtering
 
 - Browse merch (vinyl, CD, apparel) filtered by artist, genre, or format.
 
-- [gif goes here]
+- https://www.loom.com/share/844466d5f4f14c078b1ea43f93c5d531
 
 ### Order System
 
