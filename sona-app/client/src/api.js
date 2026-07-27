@@ -125,3 +125,42 @@ export const createOrder = (orderData) =>
   });
 export const getUserOrders = (userId) =>
   request(`/users/${userId}/orders`);
+export const getConcerts = ({ city = ''} = {}) => {
+  const params = new URLSearchParams();
+  if (city && typeof city === "string") {
+    params.set("city", city);
+  } else if (city && Array.isArray(city)) {
+    city.forEach(value => {
+      params.append("city", value)
+    });
+  }
+  const qs = params.toString();
+  return request(`/concerts${qs ? `?${qs}` : ``}`)
+}
+
+export const getArtistConcerts = (artistId) => 
+  request(`/artists/${artistId}/concerts`);
+
+export const createConcert = (userId, artistId, venue, city, date, ticketLink) => {
+  return request(`/artists/${artistId}/concerts`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      venue: venue,
+      city: city,
+      date: date,
+      ticket_link: ticketLink
+    }),
+  });
+}
+
+export const deleteConcert = (concertId, userId, artistId) => {
+  return request(`/concerts/${concertId}`, {
+    method: "DELETE",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+    }),
+  });
+}

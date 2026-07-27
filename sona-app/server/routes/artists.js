@@ -225,8 +225,9 @@ router.get("/:id/posts", async (req, res) => {
 
   try {
     const postResult = await pool.query(
-      `SELECT artists.id,
-              artists.name,
+      `SELECT posts.id AS post_id,
+              artists.id AS artist_id,
+              artists.name AS artist_name,
               posts.content,
               posts.created_at AS posted_on
       FROM artists
@@ -250,7 +251,7 @@ router.post('/:id/posts', async (req, res) => {
     }
 
     if (!(await isAdminOf(user_id, artist_id))) {
-        return res.status(403).json({ error: "Not authorized to create a post this artist" });
+        return res.status(403).json({ error: "Not authorized to create a post for this artist" });
     }
 
     try {
@@ -261,10 +262,64 @@ router.post('/:id/posts', async (req, res) => {
             [artist_id, content]
         )
         res.status(201).json(result.rows[0])
-        console.log("new post submitted")
+        // console.log("new post submitted")
     } catch (err) {
         res.status(500).json({error: "Failed to upload post"})
     }
+})
+
+router.get("/:id/concerts", async (req, res) => {
+  const {id} = req.params;
+  
+  try {
+    const result = await pool.query(
+      `SELECT artists.id,
+              artists.name,
+              concerts.venue,
+              concerts.city,
+              concerts.date,
+              concerts.ticket_link,
+              concerts.source
+      FROM artists
+      JOIN concerts ON artists.id = concerts.artist_id
+      WHERE artist_id = $1
+      ORDER BY concerts.date DESC`,
+      [id]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({error: "Failed to fetch concerts"})
+  }
+})
+
+router.post("/:id/concerts", async (req, res) => {
+  const {user_id, artist_id, venue, city, date, ticket_link} = req.body;
+  const todayDate = new Date();
+
+  if (!user_id || !venue || !city || !date || !ticket_link) {
+    return res.status(400).json({error: "user_id, venue, city, date, and ticket_link is required"})
+  }
+
+  if (!(await isAdminOf(user_id, artist_id))) {
+    return res.status(403).json({ error: "Not authorized to add a concert for this artist" });
+  }
+
+  const concertDateObj = new Date(date);
+  if (concertDateObj < todayDate) {
+    return res.status(403).json({error: "The concert's date must be in the future"})
+  }
+  
+  try {
+    const result = await pool.query(
+      `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
+        VALUES ($1, $2, $3, $4, $5, "manual")`,
+      [artist_id, venue, city, date, ticket_link]
+    )
+    res.status(201).json(result.rows[0])
+  } catch (err) {
+    res.status(500).json({error: "Failed to create a new concert entry"})
+  }
 })
 
 export default router;

@@ -1,8 +1,10 @@
 import pool from "./database.js";
+import { syncArtistConcerts } from "./ticketmaster.js";
 
 const dropTables = `
   DROP TABLE IF EXISTS order_items CASCADE;
   DROP TABLE IF EXISTS orders CASCADE;
+  DROP TABLE IF EXISTS concerts CASCADE;
   DROP TABLE IF EXISTS posts CASCADE;
   DROP TABLE IF EXISTS follows CASCADE;
   DROP TABLE IF EXISTS merch CASCADE;
@@ -87,6 +89,17 @@ const createTables = `
     price NUMERIC(10,2) NOT NULL CHECK (price >= 0)
   );
 
+
+  CREATE TABLE concerts (
+    id SERIAL PRIMARY KEY,
+    artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
+    venue VARCHAR(50),
+    city VARCHAR(24) NOT NULL,
+    date DATE NOT NULL,
+    ticket_link VARCHAR(2083) NOT NULL,
+    source VARCHAR(20),
+    created_at TIMESTAMP DEFAULT NOW()
+  );
 `;
 
 async function seed() {
@@ -116,7 +129,8 @@ async function seed() {
         ('Test Artist 4', 'R&B', 'https://picsum.photos/seed/artist4/400/400'),
         ('Test Artist 5', 'Indie', 'https://picsum.photos/seed/artist5/400/400'),
         ('Test Artist 6', 'Electronic', 'https://picsum.photos/seed/artist6/400/400'),
-        ('Test Artist 7', 'Jazz', 'https://picsum.photos/seed/artist7/400/400')
+        ('Test Artist 7', 'Jazz', 'https://picsum.photos/seed/artist7/400/400'),
+        ('Melanie Martinez', 'Pop', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ55NdqWPtfsR4tXLpBbuY4sPjrw7rJRPhjO-3atR0lOSglv1lZRdquYi-5anDdVUv0Sl06F9GnjxW9hpC1ygkQnZiSyQfB3wGtV5lEfs9E&s=10')
       RETURNING id, name;
     `);
     const [artist1, artist2, artist3, artist4, artist5, artist6, artist7] =
@@ -179,6 +193,20 @@ async function seed() {
       `,
       [artist1.id, artist2.id, artist3.id],
     );
+
+    console.log("Seeding concerts from the Ticketmaster Discovery API");
+    await syncArtistConcerts();
+
+    console.log("Seeding concerts manueally");
+    await client.query(
+      `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source) VALUES
+        ($1, 'CFG Arena', 'Baltimore', '2026-08-01', 'www.example.com', 'manual'),
+        ($1, 'Capital One Area', 'Washington, D.C.', '2026-07-28', 'www.example.com', 'manual'),
+        ($2, 'Capital One Area', 'Washington, D.C.', '2026-06-30', 'www.example.com', 'manual'),
+        ($3, 'The Anthem', 'Washington, D.C.', '2026-06-12', 'www.example.com', 'manual')
+      `,
+      [artist1.id, artist2.id, artist3.id]
+    )
 
     console.log("✅ Database reset and seeded successfully.");
   } catch (err) {
