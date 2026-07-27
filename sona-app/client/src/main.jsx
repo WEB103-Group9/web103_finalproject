@@ -9,6 +9,7 @@ import PostEditForm from "./pages/PostEditForm.jsx";
 import PostCreateForm from "./pages/PostCreateForm.jsx";
 import MerchShop from "./pages/MerchShop.jsx";
 import "./index.css";
+import Feed from "./pages/Feed.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/posts/create" element={<PostCreateForm />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/merch" element={<MerchShop />} />
+          <Route path="/feed" element={<Feed />} />
         </Route>
       </Routes>
     </BrowserRouter>

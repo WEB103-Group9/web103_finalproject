@@ -148,3 +148,5 @@ export const deleteConcert = (concertId, userId, artistId) => {
     }),
   });
 }
+
+export const getFeed = (userId) => request(`/users/${userId}/feed`);
