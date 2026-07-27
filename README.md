@@ -59,9 +59,8 @@ Artist Admins can post updates like new merch drops, show announcements, news, e
 ### ✅ Merch Shop with Filtering
 
 - Browse merch (vinyl, CD, apparel) filtered by artist, genre, or format.
-- https://www.loom.com/share/844466d5f4f14c078b1ea43f93c5d531
 
-- [gif goes here]
+- [gif goes here](https://www.loom.com/share/844466d5f4f14c078b1ea43f93c5d531)
 
 ### Order System
 
