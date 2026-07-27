@@ -114,7 +114,7 @@ function App() {
           <div className="nav-right">
             <Link to="/profile">Profile</Link>
             <Link to="/merch">Merch</Link>
-
+            <Link to="/feed">Feed</Link>
             <Link to="/cart" className="cart">
               🛒 {cartCount > 0 && <span>{cartCount}</span>}
             </Link>
