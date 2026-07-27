@@ -17,6 +17,7 @@ const createTables = `
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'fan',
+    photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT NOW()
   );
 

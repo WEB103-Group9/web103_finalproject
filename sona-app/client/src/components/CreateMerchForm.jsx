@@ -3,7 +3,13 @@ import { createMerch } from "../api.js";
 import currentUser from "../currentUser.js";
 
 export default function CreateMerchForm({ artistId, onCreated }) {
-  const [form, setForm] = useState({ name: "", type: "", price: "", stock: "", photo: "" });
+  const [form, setForm] = useState({
+    name: "",
+    type: "",
+    price: "",
+    stock: "",
+    photo: "",
+  });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
@@ -52,10 +58,9 @@ export default function CreateMerchForm({ artistId, onCreated }) {
         value={form.stock}
         onChange={(e) => setForm({ ...form, stock: e.target.value })}
       />
-      <input
-        placeholder="Photo URL"
+      <ImageUploader
         value={form.photo}
-        onChange={(e) => setForm({ ...form, photo: e.target.value })}
+        onUploaded={(url) => setForm({ ...form, photo: url })}
       />
 
       {error && <p className="error">{error}</p>}
