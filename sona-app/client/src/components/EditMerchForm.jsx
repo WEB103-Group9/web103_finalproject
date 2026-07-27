@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updateMerch } from "../api.js";
 import currentUser from "../currentUser.js";
+import ImageUploader from "./ImageUploader.jsx";
 
 export default function EditMerchForm({ merch, onSaved, onCancel }) {
   const [form, setForm] = useState({
@@ -41,14 +42,16 @@ export default function EditMerchForm({ merch, onSaved, onCancel }) {
         onChange={(e) => setForm({ ...form, stock: e.target.value })}
         placeholder="Stock"
       />
-      <input
+      <ImageUploader
         value={form.photo}
-        onChange={(e) => setForm({ ...form, photo: e.target.value })}
-        placeholder="Photo URL"
+        onUploaded={(url) => setForm({ ...form, photo: url })}
       />
+
       <div className="admin-controls">
         <button type="submit">Save</button>
-        <button type="button" onClick={onCancel}>Cancel</button>
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
       </div>
     </form>
   );

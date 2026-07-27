@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createMerch } from "../api.js";
 import currentUser from "../currentUser.js";
+import ImageUploader from "./ImageUploader.jsx";
 
 export default function CreateMerchForm({ artistId, onCreated }) {
   const [form, setForm] = useState({

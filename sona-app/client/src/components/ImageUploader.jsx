@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const CLOUD_NAME = "xevemu50";
-const UPLOAD_PRESET = "sona_app_unassigned";
+const CLOUD_NAME = "xevemu5o";
+const UPLOAD_PRESET = "sona_app_unsigned";
 
 export default function ImageUploader({ value, onUploaded }) {
   const [uploading, setUploading] = useState(false);
