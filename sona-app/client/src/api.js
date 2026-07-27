@@ -5,8 +5,18 @@ async function request(path, options) {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return res.status === 204 ? null : res.json();
+  if (!res.ok) {
+    let errorMessage =  `Request failed: ${res.status}`
+
+    try{
+      const errorData = await res.json()
+      errorMessage = errorData.error || errorData.message || errorMessage
+    }catch {
+
+    }
+    throw new Error(errorMessage)
+  }
+  return res.status === 204 ? null: res.json()
 }
 
 export const getArtists = ({ q = "", genre = "" } = {}) => {
@@ -108,7 +118,13 @@ export const deleteMerch = (id, userId) =>
     method: "DELETE",
     body: JSON.stringify({ user_id: userId }),
   });
-
+export const createOrder = (orderData) =>
+  request("/orders", {
+    method: "POST",
+    body: JSON.stringify(orderData),
+  });
+export const getUserOrders = (userId) =>
+  request(`/users/${userId}/orders`);
 export const getConcerts = ({ city = ''} = {}) => {
   const params = new URLSearchParams();
   if (city && typeof city === "string") {
