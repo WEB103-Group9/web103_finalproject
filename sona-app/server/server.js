@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     methods: "GET,POST,PATCH,DELETE",
     credentials: true,
   }),
@@ -28,7 +28,7 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "sona-secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
   }),

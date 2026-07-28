@@ -11,7 +11,7 @@ export default function Onboarding() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:3001/auth/login/success", {
+    fetch("${import.meta.env.VITE_API_URL}/auth/login/success", {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -24,12 +24,15 @@ export default function Onboarding() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:3001/auth/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ role, artistName, genre }),
-      });
+      const res = await fetch(
+        "${import.meta.env.VITE_API_URL}/auth/onboarding",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ role, artistName, genre }),
+        },
+      );
 
       if (!res.ok) {
         const data = await res.json();
@@ -58,7 +61,7 @@ export default function Onboarding() {
             className="onboarding-avatar"
           />
           <a
-            href="http://localhost:3001/auth/logout"
+            href="${import.meta.env.VITE_API_URL}/auth/logout"
             className="onboarding-logout-link"
           >
             Not {currentUser.username}? Logout

@@ -1,7 +1,6 @@
 import { useMemo, useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import logo from "./assets/sona-logo-tagline.svg";
-import { getUser } from "./api";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -19,7 +18,7 @@ function App() {
   }, [cartItems]);
 
   useEffect(() => {
-    fetch("http://localhost:3001/auth/login/success", {
+    fetch(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
       credentials: "include",
     })
       .then((res) => (res.ok ? res.json() : { success: false }))
@@ -47,7 +46,7 @@ function App() {
 
   async function handleLogout() {
     try {
-      await fetch("http://localhost:3001/auth/logout", {
+      await fetch("http://`${import.meta.env.VITE_API_URL}/auth/logout", {
         credentials: "include",
       });
     } catch (error) {

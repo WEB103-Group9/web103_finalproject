@@ -8,7 +8,10 @@ export default function Login() {
         <p className="login-subtitle">
           Follow artists. Discover music. All in one place.
         </p>
-        <a href="http://localhost:3001/auth/github" className="login-btn">
+        <a
+          href={`${import.meta.env.VITE_API_URL}/auth/github`}
+          className="login-btn"
+        >
           Login with GitHub
         </a>
       </div>

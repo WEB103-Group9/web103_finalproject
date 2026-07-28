@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useOutletContext, Link } from "react-router-dom";
-import { getFollowing, getUserOrders, getAdminOf } from "../api.js";
+import {
+  getFollowing,
+  getUserOrders,
+  getAdminOf,
+  updateUserPhoto,
+} from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
-import ImageUploader from "../components/ImageUploader.jsx";
 
 export default function Profile() {
   const { user, setUser, handleLogout } = useOutletContext();
@@ -32,11 +36,55 @@ export default function Profile() {
     setUser((prev) => ({ ...prev, photo: url }));
   }
 
+  async function handleFileSelect(event) {
+    console.log("file select fired", event.target.files);
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "sona_app_unsigned");
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload",
+        { method: "POST", body: formData },
+      );
+      const data = await res.json();
+      await handlePhotoUploaded(data.secure_url);
+    } catch (err) {
+      console.error("Upload failed", err);
+    }
+  }
+
   return (
     <section>
       <div className="profile-header">
-        <h1>My Profile</h1>
-
+        <div className="profile-title-row">
+          <div className="profile-avatar-upload">
+            {user?.photo ? (
+              <img
+                src={user.photo}
+                alt="Profile"
+                className="profile-avatar-bubble"
+              />
+            ) : (
+              <div className="profile-avatar-bubble profile-avatar-placeholder">
+                {user?.username?.[0]?.toUpperCase() || "?"}
+              </div>
+            )}
+            <label className="avatar-upload-label">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: "none" }}
+              />
+              ✎
+            </label>
+          </div>
+          <h1>My Profile</h1>
+        </div>
         <div className="profile-header-right">
           {managedArtist && (
             <Link to={`/artists/${managedArtist.id}`} className="btn-outline">
@@ -47,13 +95,6 @@ export default function Profile() {
             Logout
           </button>
         </div>
-      </div>
-
-      <div className="profile-photo-section">
-        {user?.photo && (
-          <img src={user.photo} alt="Profile" className="profile-avatar" />
-        )}
-        <ImageUploader value={user?.photo} onUploaded={handlePhotoUploaded} />
       </div>
 
       <div className="profile-tabs">
