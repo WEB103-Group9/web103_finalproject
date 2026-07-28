@@ -3,9 +3,10 @@ import { useOutletContext, Link } from "react-router-dom";
 import { getFollowing, getUserOrders, getAdminOf } from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
+import ImageUploader from "../components/ImageUploader.jsx";
 
 export default function Profile() {
-  const { user, handleLogout } = useOutletContext();
+  const { user, setUser, handleLogout } = useOutletContext();
   const [following, setFollowing] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedArtist, setSelectedArtist] = useState(null);
@@ -26,10 +27,16 @@ export default function Profile() {
     getAdminOf(user.id).then(setManagedArtist);
   }, [user.id]);
 
+  async function handlePhotoUploaded(url) {
+    await updateUserPhoto(user.id, url);
+    setUser((prev) => ({ ...prev, photo: url }));
+  }
+
   return (
     <section>
       <div className="profile-header">
         <h1>My Profile</h1>
+
         <div className="profile-header-right">
           {managedArtist && (
             <Link to={`/artists/${managedArtist.id}`} className="btn-outline">
@@ -40,6 +47,13 @@ export default function Profile() {
             Logout
           </button>
         </div>
+      </div>
+
+      <div className="profile-photo-section">
+        {user?.photo && (
+          <img src={user.photo} alt="Profile" className="profile-avatar" />
+        )}
+        <ImageUploader value={user?.photo} onUploaded={handlePhotoUploaded} />
       </div>
 
       <div className="profile-tabs">

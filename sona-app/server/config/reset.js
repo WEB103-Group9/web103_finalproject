@@ -19,6 +19,7 @@ const createTables = `
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'fan',
+    photo VARCHAR(255),
     github_id VARCHAR(50) UNIQUE,
     avatar_url VARCHAR(255),
     onboarded BOOLEAN DEFAULT false,

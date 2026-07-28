@@ -6,7 +6,6 @@ import {
   useOutletContext,
   Link,
 } from "react-router-dom";
-
 import {
   getArtist,
   getAdminOf,
@@ -19,6 +18,7 @@ import {
   createMerch,
   getArtistConcerts,
 } from "../api.js";
+import ImageUploader from "../components/ImageUploader.jsx";
 import FollowButton from "../components/FollowButton.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
@@ -36,6 +36,7 @@ function Social({ label, value }) {
 const EDITABLE = [
   { key: "name", label: "Name" },
   { key: "genre", label: "Genre" },
+  { key: "photo", label: "Photo", image: true },
   { key: "description", label: "Bio", textarea: true },
   { key: "instagram", label: "Instagram" },
   { key: "twitter", label: "Twitter" },
@@ -233,8 +234,14 @@ export default function ArtistDetail() {
 
       {isAdmin && editing && (
         <form onSubmit={handleSave} className="edit-form">
-          {EDITABLE.map(({ key, label, textarea }) =>
-            textarea ? (
+          {EDITABLE.map(({ key, label, textarea, image }) =>
+            image ? (
+              <ImageUploader
+                key={key}
+                value={form[key]}
+                onUploaded={(url) => setForm({ ...form, [key]: url })}
+              />
+            ) : textarea ? (
               <textarea
                 key={key}
                 value={form[key]}
@@ -436,12 +443,9 @@ export default function ArtistDetail() {
                 setMerchForm({ ...merchForm, stock: e.target.value })
               }
             />
-            <input
-              placeholder="Photo URL"
+            <ImageUploader
               value={merchForm.photo}
-              onChange={(e) =>
-                setMerchForm({ ...merchForm, photo: e.target.value })
-              }
+              onUploaded={(url) => setMerchForm({ ...merchForm, photo: url })}
             />
             {merchError && <p className="onboarding-error">{merchError}</p>}
             <div className="admin-controls">

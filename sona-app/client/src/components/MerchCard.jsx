@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { deleteMerch, updateMerch } from "../api.js";
+import ImageUploader from "./ImageUploader.jsx";
 
 export default function MerchCard({
   merch,
@@ -88,10 +89,9 @@ export default function MerchCard({
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
               placeholder="Stock"
             />
-            <input
+            <ImageUploader
               value={form.photo}
-              onChange={(e) => setForm({ ...form, photo: e.target.value })}
-              placeholder="Photo URL"
+              onUploaded={(url) => setForm({ ...form, photo: url })}
             />
             {error && <p className="onboarding-error">{error}</p>}
             <div className="admin-controls">

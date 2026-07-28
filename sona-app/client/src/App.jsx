@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-
 import logo from "./assets/sona-logo-tagline.svg";
+import { getUser } from "./api";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -167,12 +167,14 @@ function App() {
               🛒 {cartCount > 0 && <span>({cartCount})</span>}
             </Link>
             <Link to="/profile" className="nav-avatar-link">
-              {user?.avatar_url && (
+              {user?.avatar_url ? (
                 <img
                   src={user.avatar_url}
                   alt={user.username}
                   style={{ width: 32, height: 32, borderRadius: "50%" }}
                 />
+              ) : (
+                "Profile"
               )}
             </Link>
           </div>
@@ -183,6 +185,7 @@ function App() {
         <Outlet
           context={{
             user,
+            setUser,
             handleLogout,
             cartItems,
             addToCart,

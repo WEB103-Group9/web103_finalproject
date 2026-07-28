@@ -18,6 +18,11 @@ async function request(path, options) {
   return res.status === 204 ? null : res.json();
 }
 
+export const getUser = (id) => request(`/users/${id}`);
+
+export const updateUserPhoto = (id, photo) =>
+  request(`/users/${id}`, { method: "PATCH", body: JSON.stringify({ photo }) });
+
 export const getArtists = ({ q = "", genre = "" } = {}) => {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
