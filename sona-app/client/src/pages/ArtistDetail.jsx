@@ -3,9 +3,10 @@ import {
   useParams,
   useNavigate,
   useSearchParams,
+  useOutletContext,
   Link,
 } from "react-router-dom";
-import currentUser from "../currentUser.js";
+
 import {
   getArtist,
   getAdminOf,
@@ -13,12 +14,14 @@ import {
   updateArtist,
   deleteArtist,
   getPostsByArtist,
+  createPost,
   getArtistMerch,
+  createMerch,
+  getArtistConcerts,
 } from "../api.js";
 import FollowButton from "../components/FollowButton.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
-import CreateMerchForm from "../components/CreateMerchForm.jsx";
 import Toast from "../components/Toast.jsx";
 
 function Social({ label, value }) {
@@ -42,6 +45,7 @@ const EDITABLE = [
 ];
 
 export default function ArtistDetail() {
+  const { user } = useOutletContext();
   const { id } = useParams();
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
@@ -56,6 +60,21 @@ export default function ArtistDetail() {
   const [merch, setMerch] = useState([]);
   const [merchLoading, setMerchLoading] = useState(true);
   const [showCreateMerch, setShowCreateMerch] = useState(false);
+  const [merchForm, setMerchForm] = useState({
+    name: "",
+    type: "",
+    price: "",
+    stock: "",
+    photo: "",
+  });
+  const [merchError, setMerchError] = useState("");
+  const [merchSubmitting, setMerchSubmitting] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [postContent, setPostContent] = useState("");
+  const [postError, setPostError] = useState("");
+  const [postSubmitting, setPostSubmitting] = useState(false);
+  const [concerts, setConcerts] = useState([]);
+  const [concertsLoading, setConcertsLoading] = useState(true);
 
   let new_post = searchParams.get("new_post") === "true";
 
@@ -66,15 +85,15 @@ export default function ArtistDetail() {
       for (const { key } of EDITABLE) seeded[key] = data[key] ?? "";
       setForm(seeded);
     });
-    getAdminOf(currentUser.id).then((administered) => {
+    getAdminOf(user.id).then((administered) => {
       setIsAdmin(administered?.id === Number(id));
     });
-    getFollowing(currentUser.id).then((rows) => {
+    getFollowing(user.id).then((rows) => {
       const match = rows.find((row) => row.id === Number(id));
       setFollowing(Boolean(match));
       setNotify(match?.notify_on_release ?? false);
     });
-  }, [id]);
+  }, [id, user.id]);
 
   useEffect(() => {
     getPostsByArtist(id).then(setPosts);
@@ -82,6 +101,10 @@ export default function ArtistDetail() {
     getArtistMerch(id)
       .then(setMerch)
       .finally(() => setMerchLoading(false));
+    setConcertsLoading(true);
+    getArtistConcerts(id)
+      .then(setConcerts)
+      .finally(() => setConcertsLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -99,16 +122,67 @@ export default function ArtistDetail() {
     event.preventDefault();
     const updated = await updateArtist(id, {
       ...form,
-      user_id: currentUser.id,
+      user_id: user.id,
     });
     setArtist((prev) => ({ ...prev, ...updated, ...form }));
     setEditing(false);
   }
 
+  async function handleCreatePost(event) {
+    event.preventDefault();
+    if (!postContent.trim()) {
+      setPostError("Post can't be empty.");
+      return;
+    }
+    setPostError("");
+    setPostSubmitting(true);
+    try {
+      const newPost = await createPost(user.id, artist.id, postContent);
+      setPosts((prev) => [
+        { ...newPost, posted_on: newPost.created_at },
+        ...prev,
+      ]);
+      setPostContent("");
+      setShowCreatePost(false);
+      showToast("Post published");
+    } catch (err) {
+      setPostError("Something went wrong.");
+    } finally {
+      setPostSubmitting(false);
+    }
+  }
+
+  async function handleCreateMerch(event) {
+    event.preventDefault();
+    setMerchError("");
+    setMerchSubmitting(true);
+    try {
+      const created = await createMerch(artist.id, {
+        ...merchForm,
+        price: Number(merchForm.price),
+        stock: Number(merchForm.stock) || 0,
+        user_id: user.id,
+      });
+      setMerch((prev) => [created, ...prev]);
+      setMerchForm({ name: "", type: "", price: "", stock: "", photo: "" });
+      setShowCreateMerch(false);
+      setToast("Merch created!");
+      setTimeout(() => setToast(""), 3000);
+    } catch (err) {
+      setMerchError("Failed to create merch.");
+    } finally {
+      setMerchSubmitting(false);
+    }
+  }
+
   async function handleDelete() {
     if (!confirm(`Delete ${artist.name}?`)) return;
-    await deleteArtist(id, currentUser.id);
-    navigate("/");
+    try {
+      await deleteArtist(id, user.id);
+      navigate("/");
+    } catch (err) {
+      alert("Failed to delete — you may need to log in again.");
+    }
   }
 
   function showToast(message) {
@@ -140,7 +214,7 @@ export default function ArtistDetail() {
             <div className="admin-controls">
               <button
                 type="button"
-                className="btn"
+                className="btn-outline"
                 onClick={() => setEditing(true)}
               >
                 Edit
@@ -219,54 +293,180 @@ export default function ArtistDetail() {
 
         <div className="detail-side">
           <h2>Concerts</h2>
-          <p className="placeholder">Concerts table — coming soon (Issue 8)</p>
+          {concertsLoading ? (
+            <p>Loading...</p>
+          ) : concerts.length === 0 ? (
+            <p className="placeholder">No upcoming concerts.</p>
+          ) : (
+            <div className="concerts-scroll">
+              {concerts.map((concert) => (
+                <div key={concert.id} className="concert-row">
+                  <div className="concert-row-info">
+                    <strong>{concert.venue}</strong>
+                    <span className="concert-row-city">{concert.city}</span>
+                    <span className="concert-row-date">
+                      {new Date(concert.date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <a
+                    href={concert.ticket_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-sm"
+                  >
+                    Get Tickets
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <section>
         <div className="posts-titlebar">
           <h2>Posts</h2>
-          {isAdmin && (
-            <Link
-              className="btn"
-              role="button"
-              to={`/posts/create?artist=${artist.id}`}
-            >
-              Create
-            </Link>
+          {isAdmin && !showCreatePost && (
+            <button className="btn" onClick={() => setShowCreatePost(true)}>
+              Add New Post
+            </button>
           )}
         </div>
+
+        {isAdmin && showCreatePost && (
+          <form onSubmit={handleCreatePost} className="edit-form">
+            <textarea
+              placeholder="Text for new post"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              autoFocus
+            ></textarea>
+            {postError && <p className="onboarding-error">{postError}</p>}
+            <div className="admin-controls">
+              <button type="submit" className="btn" disabled={postSubmitting}>
+                {postSubmitting ? "Posting..." : "Post"}
+              </button>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => setShowCreatePost(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
         <div className="grid">
-          {posts.length > 0 ?
-            (posts.map((post) => (
-              <ArtistPost key={post.id} postDetails={post} isAdmin={isAdmin} />
-            ))) :
-            (<p className="placeholder">No posts yet.</p>)
-          }
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <ArtistPost
+                key={post.id}
+                postDetails={post}
+                isAdmin={isAdmin}
+                onUpdated={(updated) => {
+                  setPosts((prev) =>
+                    prev.map((p) => (p.id === updated.id ? updated : p)),
+                  );
+                  showToast("Post updated");
+                }}
+                onDeleted={(deletedId) => {
+                  setPosts((prev) => prev.filter((p) => p.id !== deletedId));
+                  showToast("Post deleted");
+                }}
+              />
+            ))
+          ) : (
+            <p className="placeholder">No posts yet.</p>
+          )}
         </div>
       </section>
 
       <section className="merch-strip">
         <div className="merch-head">
           <h2>Merch</h2>
-          <Link to="/merch">See All →</Link>
+          {isAdmin && !showCreateMerch && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setShowCreateMerch(true)}
+            >
+              Add New Merch
+            </button>
+          )}
         </div>
 
-        {isAdmin && !showCreateMerch && (
-          <button type="button" onClick={() => setShowCreateMerch(true)}>
-            Add Merch
-          </button>
-        )}
-
         {isAdmin && showCreateMerch && (
-          <CreateMerchForm
-            artistId={id}
-            onCreated={(created) => {
-              setMerch((prev) => [created, ...prev]);
-              setToast("Merch created!");
-              setTimeout(() => setToast(""), 3000);
-            }}
-          />
+          <form onSubmit={handleCreateMerch} className="edit-form">
+            <input
+              placeholder="Name"
+              value={merchForm.name}
+              onChange={(e) =>
+                setMerchForm({ ...merchForm, name: e.target.value })
+              }
+              required
+            />
+            <input
+              placeholder="Type"
+              value={merchForm.type}
+              onChange={(e) =>
+                setMerchForm({ ...merchForm, type: e.target.value })
+              }
+              required
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Price"
+              value={merchForm.price}
+              onChange={(e) =>
+                setMerchForm({ ...merchForm, price: e.target.value })
+              }
+              required
+            />
+            <input
+              type="number"
+              placeholder="Stock"
+              value={merchForm.stock}
+              onChange={(e) =>
+                setMerchForm({ ...merchForm, stock: e.target.value })
+              }
+            />
+            <input
+              placeholder="Photo URL"
+              value={merchForm.photo}
+              onChange={(e) =>
+                setMerchForm({ ...merchForm, photo: e.target.value })
+              }
+            />
+            {merchError && <p className="onboarding-error">{merchError}</p>}
+            <div className="admin-controls">
+              <button type="submit" className="btn" disabled={merchSubmitting}>
+                {merchSubmitting ? "Creating..." : "Create Merch"}
+              </button>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => {
+                  setShowCreateMerch(false);
+                  setMerchForm({
+                    name: "",
+                    type: "",
+                    price: "",
+                    stock: "",
+                    photo: "",
+                  });
+                  setMerchError("");
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         )}
 
         {merchLoading ? (
@@ -274,25 +474,30 @@ export default function ArtistDetail() {
         ) : merch.length === 0 ? (
           <p className="placeholder">No merch yet.</p>
         ) : (
-          <div className="grid">
-            {merch.map((item) => (
-              <MerchCard
-                key={item.id}
-                merch={item}
-                isAdmin={isAdmin}
-                onUpdated={(updated) => {
-                  setMerch((prev) =>
-                    prev.map((m) => (m.id === updated.id ? updated : m)),
-                  );
-                  setToast("Merch updated!");
-                  setTimeout(() => setToast(""), 3000);
-                }}
-                onDeleted={(deletedId) => {
-                  setMerch((prev) => prev.filter((m) => m.id !== deletedId));
-                }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid">
+              {merch.map((item) => (
+                <MerchCard
+                  key={item.id}
+                  merch={item}
+                  isAdmin={isAdmin}
+                  onUpdated={(updated) => {
+                    setMerch((prev) =>
+                      prev.map((m) => (m.id === updated.id ? updated : m)),
+                    );
+                    setToast("Merch updated!");
+                    setTimeout(() => setToast(""), 3000);
+                  }}
+                  onDeleted={(deletedId) => {
+                    setMerch((prev) => prev.filter((m) => m.id !== deletedId));
+                  }}
+                />
+              ))}
+            </div>
+            <div className="merch-see-all">
+              <Link to="/merch">See All →</Link>
+            </div>
+          </>
         )}
       </section>
 

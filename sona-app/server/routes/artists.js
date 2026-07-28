@@ -46,43 +46,45 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/artists/:id/merch
-router.get('/:id/merch', async (req, res) => {
+router.get("/:id/merch", async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT * FROM merch WHERE artist_id = $1 ORDER BY created_at DESC',
-      [req.params.id]
+      "SELECT * FROM merch WHERE artist_id = $1 ORDER BY created_at DESC",
+      [req.params.id],
     );
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch artist merch' });
+    res.status(500).json({ error: "Failed to fetch artist merch" });
   }
 });
 
 // POST /api/artists/:id/merch
-router.post('/:id/merch', async (req, res) => {
+router.post("/:id/merch", async (req, res) => {
   try {
     const artistId = req.params.id;
-    const { user_id, name, type, price, photo, stock } = req.body;
-
-    if (!user_id) return res.status(400).json({ error: 'user_id is required' });
+    if (!req.user) return res.status(401).json({ error: "Not logged in" });
+    const user_id = req.user.id;
+    const { name, type, price, photo, stock } = req.body;
 
     if (!(await isAdminOf(user_id, artistId))) {
-      return res.status(403).json({ error: 'Not authorized' });
+      return res.status(403).json({ error: "Not authorized" });
     }
     if (!name || !type || price === undefined) {
-      return res.status(400).json({ error: 'name, type, and price are required' });
+      return res
+        .status(400)
+        .json({ error: "name, type, and price are required" });
     }
 
     const { rows } = await pool.query(
       `INSERT INTO merch (artist_id, name, type, price, photo, stock)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [artistId, name, type, price, photo, stock ?? 0]
+      [artistId, name, type, price, photo, stock ?? 0],
     );
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to create merch' });
+    res.status(500).json({ error: "Failed to create merch" });
   }
 });
 
@@ -108,59 +110,27 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  const {
-    name, genre, photo,
-    description, instagram, twitter, facebook, tiktok, spotify,
-  } = req.body;
-
-  if (!name) {
-    return res.status(400).json({ error: "name is required" });
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const artistResult = await client.query(
-      `INSERT INTO artists (name, genre, photo)
-       VALUES ($1, $2, $3)
-       RETURNING *`,
-      [name, genre, photo],
-    );
-    const artist = artistResult.rows[0];
-
-    await client.query(
-      `INSERT INTO profile
-         (artist_id, description, instagram, twitter, facebook, tiktok, spotify)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [artist.id, description, instagram, twitter, facebook, tiktok, spotify],
-    );
-
-    await client.query("COMMIT");
-    res.status(201).json(artist);
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ error: "Failed to create artist" });
-  } finally {
-    client.release();
-  }
-});
-
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
+
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
   const {
-    user_id,
-    name, genre, photo,
-    description, instagram, twitter, facebook, tiktok, spotify,
+    name,
+    genre,
+    photo,
+    description,
+    instagram,
+    twitter,
+    facebook,
+    tiktok,
+    spotify,
   } = req.body;
 
-  if (!user_id) {
-    return res.status(400).json({ error: "user_id is required" });
-  }
   if (!(await isAdminOf(user_id, id))) {
-    return res.status(403).json({ error: "Not authorized to edit this artist" });
+    return res
+      .status(403)
+      .json({ error: "Not authorized to edit this artist" });
   }
 
   const client = await pool.connect();
@@ -202,30 +172,41 @@ router.patch("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
-  const { user_id } = req.body;
 
-  if (!user_id) {
-    return res.status(400).json({ error: "user_id is required" });
-  }
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+
   if (!(await isAdminOf(user_id, id))) {
-    return res.status(403).json({ error: "Not authorized to delete this artist" });
+    return res
+      .status(403)
+      .json({ error: "Not authorized to delete this artist" });
   }
 
+  const client = await pool.connect();
   try {
-    await pool.query(`DELETE FROM artists WHERE id = $1`, [id]);
+    await client.query("BEGIN");
+    await client.query(`DELETE FROM artists WHERE id = $1`, [id]);
+    await client.query(
+      `UPDATE users SET role = 'fan', onboarded = false WHERE id = $1`,
+      [user_id],
+    );
+    await client.query("COMMIT");
     res.status(204).send();
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ error: "Failed to delete artist" });
+  } finally {
+    client.release();
   }
 });
 
 router.get("/:id/posts", async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
 
   try {
     const postResult = await pool.query(
-      `SELECT posts.id AS post_id,
+      `SELECT posts.id,
               artists.id AS artist_id,
               artists.name AS artist_name,
               posts.content,
@@ -234,43 +215,46 @@ router.get("/:id/posts", async (req, res) => {
       JOIN posts ON artists.id = posts.artist_id
       WHERE artist_id = $1
       ORDER BY posts.created_at DESC`,
-      [id]
-    )
-    res.json(postResult.rows)
+      [id],
+    );
+    res.json(postResult.rows);
   } catch (err) {
-    console.error(err)
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch posts" });
   }
-})
+});
 
-router.post('/:id/posts', async (req, res) => {
-    const {user_id, artist_id, content} = req.body;
+router.post("/:id/posts", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+  const { artist_id, content } = req.body;
 
-    if (!artist_id || !content) {
-        return res.status(400).json({error: 'artist_id and content is required'})
-    }
+  if (!artist_id || !content) {
+    return res.status(400).json({ error: "artist_id and content is required" });
+  }
 
-    if (!(await isAdminOf(user_id, artist_id))) {
-        return res.status(403).json({ error: "Not authorized to create a post for this artist" });
-    }
+  if (!(await isAdminOf(user_id, artist_id))) {
+    return res
+      .status(403)
+      .json({ error: "Not authorized to create a post for this artist" });
+  }
 
-    try {
-        const result = await pool.query(
-            `INSERT INTO posts (artist_id, content)
+  try {
+    const result = await pool.query(
+      `INSERT INTO posts (artist_id, content)
             VALUES ($1, $2)
             RETURNING *`,
-            [artist_id, content]
-        )
-        res.status(201).json(result.rows[0])
-        // console.log("new post submitted")
-    } catch (err) {
-        res.status(500).json({error: "Failed to upload post"})
-    }
-})
+      [artist_id, content],
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to upload post" });
+  }
+});
 
 router.get("/:id/concerts", async (req, res) => {
-  const {id} = req.params;
-  
+  const { id } = req.params;
+
   try {
     const result = await pool.query(
       `SELECT artists.id,
@@ -284,42 +268,51 @@ router.get("/:id/concerts", async (req, res) => {
       JOIN concerts ON artists.id = concerts.artist_id
       WHERE artist_id = $1
       ORDER BY concerts.date DESC`,
-      [id]
-    )
-    res.json(result.rows)
+      [id],
+    );
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({error: "Failed to fetch concerts"})
+    res.status(500).json({ error: "Failed to fetch concerts" });
   }
-})
+});
 
 router.post("/:id/concerts", async (req, res) => {
-  const {user_id, artist_id, venue, city, date, ticket_link} = req.body;
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+  const { artist_id, venue, city, date, ticket_link } = req.body;
   const todayDate = new Date();
 
-  if (!user_id || !venue || !city || !date || !ticket_link) {
-    return res.status(400).json({error: "user_id, venue, city, date, and ticket_link is required"})
+  if (!venue || !city || !date || !ticket_link) {
+    return res.status(400).json({
+      error: "venue, city, date, and ticket_link is required",
+    });
   }
 
   if (!(await isAdminOf(user_id, artist_id))) {
-    return res.status(403).json({ error: "Not authorized to add a concert for this artist" });
+    return res
+      .status(403)
+      .json({ error: "Not authorized to add a concert for this artist" });
   }
 
   const concertDateObj = new Date(date);
   if (concertDateObj < todayDate) {
-    return res.status(403).json({error: "The concert's date must be in the future"})
+    return res
+      .status(403)
+      .json({ error: "The concert's date must be in the future" });
   }
-  
+
   try {
     const result = await pool.query(
       `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
-        VALUES ($1, $2, $3, $4, $5, "manual")`,
-      [artist_id, venue, city, date, ticket_link]
-    )
-    res.status(201).json(result.rows[0])
+        VALUES ($1, $2, $3, $4, $5, 'manual')
+        RETURNING *`,
+      [artist_id, venue, city, date, ticket_link],
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({error: "Failed to create a new concert entry"})
+    res.status(500).json({ error: "Failed to create a new concert entry" });
   }
-})
+});
 
 export default router;

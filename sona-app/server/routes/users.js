@@ -44,7 +44,7 @@ router.get("/:id/feed", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      `SELECT 'post' AS type, posts.id, posts.artist_id, artists.name AS artist_name,
+      `SELECT 'post' AS type, posts.id, posts.artist_id, artists.name AS artist_name, artists.photo AS artist_photo,
               posts.created_at,
               json_build_object('content', posts.content) AS data
        FROM posts
@@ -52,7 +52,7 @@ router.get("/:id/feed", async (req, res) => {
        JOIN follows ON follows.artist_id = posts.artist_id
        WHERE follows.user_id = $1
        UNION ALL
-       SELECT 'concert' AS type, concerts.id, concerts.artist_id, artists.name AS artist_name,
+       SELECT 'concert' AS type, concerts.id, concerts.artist_id, artists.name AS artist_name, artists.photo AS artist_photo,
               concerts.created_at,
               json_build_object(
                 'venue', concerts.venue,
@@ -65,7 +65,7 @@ router.get("/:id/feed", async (req, res) => {
        JOIN follows ON follows.artist_id = concerts.artist_id
        WHERE follows.user_id = $1
        UNION ALL
-       SELECT 'merch' AS type, merch.id, merch.artist_id, artists.name AS artist_name,
+       SELECT 'merch' AS type, merch.id, merch.artist_id, artists.name AS artist_name, artists.photo AS artist_photo,
               merch.created_at,
               json_build_object(
                 'name', merch.name,
@@ -87,24 +87,25 @@ router.get("/:id/feed", async (req, res) => {
   }
 });
 
-router.get("/:id/orders", async(req, res)=>{
-  const userId = Number(req.params.id)
-  if(!Number.isInteger(userId) || userId <= 0){
+router.get("/:id/orders", async (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) {
     return res.status(400).json({
       error: "A valid user ID is required",
     });
   }
-  try{
+  try {
     const userResult = await pool.query(
       `SELECT id FROM users
-      WHERE id = $1`,[userId]
+      WHERE id = $1`,
+      [userId],
     );
-    if(userResult.rows.length === 0){
+    if (userResult.rows.length === 0) {
       return res.status(404).json({
         error: "User not found",
       });
     }
-     const result = await pool.query(
+    const result = await pool.query(
       `SELECT
          orders.id,
          orders.user_id,
@@ -135,12 +136,12 @@ router.get("/:id/orders", async(req, res)=>{
       [userId],
     );
     res.json(result.rows);
-  } catch(err){
-    console.error("Failed to fetch order history:", err)
+  } catch (err) {
+    console.error("Failed to fetch order history:", err);
     res.status(500).json({
       error: "Failed to fetch order history",
     });
   }
-})
+});
 
 export default router;
