@@ -1,4 +1,4 @@
-import "./QuickViewPanel.css";
+import "../index.css";
 
 export default function QuickViewPanel({ artist, onClose }) {
   if (!artist) return null;

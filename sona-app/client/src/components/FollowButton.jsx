@@ -53,7 +53,7 @@ export default function FollowButton({
       {following && (
         <label className="notify">
           <input type="checkbox" checked={notify} onChange={toggleNotify} />
-          Notify me on release
+          Notify Me
         </label>
       )}
 

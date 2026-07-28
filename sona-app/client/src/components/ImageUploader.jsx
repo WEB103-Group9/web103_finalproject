@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const CLOUD_NAME = "xevemu5o";
-const UPLOAD_PRESET = "sona_app_unsigned";
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export default function ImageUploader({ value, onUploaded }) {
   const [uploading, setUploading] = useState(false);
@@ -21,7 +21,7 @@ export default function ImageUploader({ value, onUploaded }) {
     try {
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        { method: "POST", body: formData }
+        { method: "POST", body: formData },
       );
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
@@ -36,7 +36,12 @@ export default function ImageUploader({ value, onUploaded }) {
   return (
     <div className="image-uploader">
       {value && <img src={value} alt="Preview" className="upload-preview" />}
-      <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={uploading}
+      />
       {uploading && <p>Uploading...</p>}
       {error && <p className="error">{error}</p>}
     </div>

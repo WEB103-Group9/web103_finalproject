@@ -14,13 +14,13 @@ router.get(
 router.get(
   "/github/callback",
   passport.authenticate("github", {
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
   }),
   (req, res) => {
     if (!req.user.onboarded) {
-      return res.redirect("http://localhost:5173/onboarding");
+      return res.redirect(`${process.env.CLIENT_URL}/onboarding`);
     }
-    res.redirect("http://localhost:5173");
+    res.redirect(process.env.CLIENT_URL);
   },
 );
 
@@ -108,7 +108,7 @@ router.get("/logout", (req, res, next) => {
         return next(err);
       }
       res.clearCookie("connect.sid");
-      res.redirect("http://localhost:5173/login");
+      res.redirect(`${process.env.CLIENT_URL}/login`);
     });
   });
 });
