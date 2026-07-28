@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getMerch, getArtists } from "../api.js";
 import MerchCard from "../components/MerchCard.jsx";
+import { useOutletContext } from "react-router-dom";
 
 export default function MerchShop() {
   const [merch, setMerch] = useState([]);
@@ -9,6 +10,8 @@ export default function MerchShop() {
   const [type, setType] = useState("");
   const [sort, setSort] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const { addToCart } = useOutletContext()
 
   useEffect(() => {
     getArtists().then(setArtists);
@@ -54,7 +57,7 @@ export default function MerchShop() {
       ) : (
         <div className="grid">
           {merch.map((item) => (
-            <MerchCard key={item.id} merch={item} />
+            <MerchCard key={item.id} merch={item} addToCart={addToCart} />
           ))}
         </div>
       )}

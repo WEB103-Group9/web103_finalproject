@@ -1,25 +1,58 @@
 import express from "express";
 import cors from "cors";
+import session from "express-session";
+import passport from "passport";
 import "./config/dotenv.js";
+import { GitHub } from "./config/auth.js";
+
 import artistsRouter from "./routes/artists.js";
 import usersRouter from "./routes/users.js";
 import followsRouter from "./routes/follows.js";
 import postsRouter from "./routes/posts.js";
 import merchRouter from "./routes/merch.js";
-import concertRouter from './routes/concerts.js'
+import orderRoutes from "./routes/orders.js";
+import concertRouter from "./routes/concerts.js";
+import authRouter from "./routes/auth.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: "GET,POST,PATCH,DELETE",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
+app.use(
+  session({
+    secret: "sona-secret",
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(GitHub);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+app.use("/auth", authRouter);
 app.use("/api/artists", artistsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/follows", followsRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/merch", merchRouter);
+app.use("/api/orders", orderRoutes);
 app.use("/api/concerts", concertRouter);
 
 app.listen(PORT, () => {

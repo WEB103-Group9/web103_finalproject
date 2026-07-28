@@ -2,6 +2,8 @@ import pool from "./database.js";
 import { syncArtistConcerts } from "./ticketmaster.js";
 
 const dropTables = `
+  DROP TABLE IF EXISTS order_items CASCADE;
+  DROP TABLE IF EXISTS orders CASCADE;
   DROP TABLE IF EXISTS concerts CASCADE;
   DROP TABLE IF EXISTS posts CASCADE;
   DROP TABLE IF EXISTS follows CASCADE;
@@ -18,6 +20,9 @@ const createTables = `
     username VARCHAR(50) UNIQUE NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'fan',
     photo VARCHAR(255),
+    github_id VARCHAR(50) UNIQUE,
+    avatar_url VARCHAR(255),
+    onboarded BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
   );
 
@@ -73,6 +78,21 @@ const createTables = `
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    merch_id INTEGER NOT NULL REFERENCES merch(id),
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    price NUMERIC(10,2) NOT NULL CHECK (price >= 0)
+  );
+
 
   CREATE TABLE concerts (
     id SERIAL PRIMARY KEY,
@@ -178,10 +198,10 @@ async function seed() {
       [artist1.id, artist2.id, artist3.id],
     );
 
-    console.log("Seeding concerts from the Ticketmaster Discovery API");
+    console.log("Seeding Ticketmaster Discovery API concerts...");
     await syncArtistConcerts();
 
-    console.log("Seeding concerts manueally");
+    console.log("Seeding concerts manually");
     await client.query(
       `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source) VALUES
         ($1, 'CFG Arena', 'Baltimore', '2026-08-01', 'www.example.com', 'manual'),
@@ -189,8 +209,8 @@ async function seed() {
         ($2, 'Capital One Area', 'Washington, D.C.', '2026-06-30', 'www.example.com', 'manual'),
         ($3, 'The Anthem', 'Washington, D.C.', '2026-06-12', 'www.example.com', 'manual')
       `,
-      [artist1.id, artist2.id, artist3.id]
-    )
+      [artist1.id, artist2.id, artist3.id],
+    );
 
     console.log("✅ Database reset and seeded successfully.");
   } catch (err) {

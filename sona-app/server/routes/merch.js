@@ -1,18 +1,11 @@
-import { Router } from 'express';
-import pool from '../config/database.js';
+import { Router } from "express";
+import pool from "../config/database.js";
+import { isAdminOf } from "./artists.js";
 
 const router = Router();
 
-async function isAdminOf(userId, artistId) {
-  const result = await pool.query(
-    `SELECT 1 FROM admin WHERE user_id = $1 AND artist_id = $2`,
-    [userId, artistId],
-  );
-  return result.rows.length > 0;
-}
-
 // GET /api/merch?artist_id=&type=&sort=
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { artist_id, type, sort } = req.query;
     const conditions = [];
@@ -27,42 +20,43 @@ router.get('/', async (req, res) => {
       conditions.push(`type = $${values.length}`);
     }
 
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const sortMap = {
-      price_asc: 'price ASC',
-      price_desc: 'price DESC',
+      price_asc: "price ASC",
+      price_desc: "price DESC",
     };
-    const orderBy = sortMap[sort] ? `ORDER BY ${sortMap[sort]}` : 'ORDER BY created_at DESC';
+    const orderBy = sortMap[sort]
+      ? `ORDER BY ${sortMap[sort]}`
+      : "ORDER BY created_at DESC";
 
     const { rows } = await pool.query(
       `SELECT * FROM merch ${where} ${orderBy}`,
-      values
+      values,
     );
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch merch' });
+    res.status(500).json({ error: "Failed to fetch merch" });
   }
 });
 
 // PATCH /api/merch/:id
-router.patch('/:id', async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const { user_id, name, type, price, photo, stock } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required' });
-    }
+    if (!req.user) return res.status(401).json({ error: "Not logged in" });
+    const user_id = req.user.id;
+    const { name, type, price, photo, stock } = req.body;
 
     const { rows: existing } = await pool.query(
-      'SELECT artist_id FROM merch WHERE id = $1',
-      [req.params.id]
+      "SELECT artist_id FROM merch WHERE id = $1",
+      [req.params.id],
     );
-    if (!existing.length) return res.status(404).json({ error: 'Merch not found' });
+    if (!existing.length)
+      return res.status(404).json({ error: "Merch not found" });
 
     if (!(await isAdminOf(user_id, existing[0].artist_id))) {
-      return res.status(403).json({ error: 'Not authorized' });
+      return res.status(403).json({ error: "Not authorized" });
     }
 
     const { rows } = await pool.query(
@@ -73,40 +67,37 @@ router.patch('/:id', async (req, res) => {
          photo = COALESCE($4, photo),
          stock = COALESCE($5, stock)
        WHERE id = $6 RETURNING *`,
-      [name, type, price, photo, stock, req.params.id]
+      [name, type, price, photo, stock, req.params.id],
     );
     res.json(rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to update merch' });
+    res.status(500).json({ error: "Failed to update merch" });
   }
 });
 
-
 // DELETE /api/merch/:id
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const { user_id } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required' });
-    }
+    if (!req.user) return res.status(401).json({ error: "Not logged in" });
+    const user_id = req.user.id;
 
     const { rows: existing } = await pool.query(
-      'SELECT artist_id FROM merch WHERE id = $1',
-      [req.params.id]
+      "SELECT artist_id FROM merch WHERE id = $1",
+      [req.params.id],
     );
-    if (!existing.length) return res.status(404).json({ error: 'Merch not found' });
+    if (!existing.length)
+      return res.status(404).json({ error: "Merch not found" });
 
     if (!(await isAdminOf(user_id, existing[0].artist_id))) {
-      return res.status(403).json({ error: 'Not authorized' });
+      return res.status(403).json({ error: "Not authorized" });
     }
 
-    await pool.query('DELETE FROM merch WHERE id = $1', [req.params.id]);
+    await pool.query("DELETE FROM merch WHERE id = $1", [req.params.id]);
     res.status(204).send();
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to delete merch' });
+    res.status(500).json({ error: "Failed to delete merch" });
   }
 });
 

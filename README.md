@@ -56,25 +56,25 @@ Artist Admins can post updates like new merch drops, show announcements, news, e
 
 - ![Artist Quick-View Panel](https://i.imgur.com/8dW0ZTp.gif)
 
-### Merch Shop with Filtering
+### ✅ Merch Shop with Filtering
 
 - Browse merch (vinyl, CD, apparel) filtered by artist, genre, or format.
 
-- [gif goes here]
+- ![](https://www.loom.com/share/844466d5f4f14c078b1ea43f93c5d531)
 
-### Order System
+### ✅ Order System
 
 - Add merch to a cart and place an order; view order history.
 
 - [gif goes here]
 
-### Concert Listings
+### ✅ Concert Listings
 
 - View upcoming shows per artist, filterable by city and/or date.
 
 - [gif goes here]
 
-### Following Feed
+### ✅ Following Feed
 
 - A personalized feed combining posts, upcoming shows, and merch drops from every artist a fan follows.
 

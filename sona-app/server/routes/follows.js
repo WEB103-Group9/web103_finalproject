@@ -4,10 +4,12 @@ import pool from "../config/database.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  const { user_id, artist_id, notify_on_release = false } = req.body;
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+  const { artist_id, notify_on_release = false } = req.body;
 
-  if (!user_id || !artist_id) {
-    return res.status(400).json({ error: "user_id and artist_id are required" });
+  if (!artist_id) {
+    return res.status(400).json({ error: "artist_id is required" });
   }
 
   try {
@@ -27,12 +29,9 @@ router.post("/", async (req, res) => {
 });
 
 router.delete("/:artistId", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
   const { artistId } = req.params;
-  const { user_id } = req.query;
-
-  if (!user_id) {
-    return res.status(400).json({ error: "user_id is required" });
-  }
 
   try {
     await pool.query(

@@ -1,56 +1,142 @@
 import { useEffect, useState } from "react";
-import { getFollowing, updateUserPhoto } from "../api.js";
-import currentUser from "../currentUser.js";
+import { useOutletContext, Link } from "react-router-dom";
+import { getFollowing, getUserOrders, getAdminOf } from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
-import { useOutletContext } from "react-router-dom";
+import QuickViewPanel from "../components/QuickViewPanel.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 
 export default function Profile() {
-  const { user, setUser } = useOutletContext();
+  const { user, setUser, handleLogout } = useOutletContext();
   const [following, setFollowing] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [managedArtist, setManagedArtist] = useState(null);
+  const [activeTab, setActiveTab] = useState("following");
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
-    getFollowing(currentUser.id)
+    getFollowing(user.id)
       .then(setFollowing)
       .finally(() => setLoading(false));
-  }, []);
+    getUserOrders(user.id)
+      .then(setOrders)
+      .catch((error) => setOrdersError(error.message))
+      .finally(() => setOrdersLoading(false));
+    getAdminOf(user.id).then(setManagedArtist);
+  }, [user.id]);
 
   async function handlePhotoUploaded(url) {
-    const updated = await updateUserPhoto(currentUser.id, url);
-    setUser(updated);
+    await updateUserPhoto(user.id, url);
+    setUser((prev) => ({ ...prev, photo: url }));
   }
 
   return (
     <section>
-      <h1>My Profile</h1>
-
       <div className="profile-header">
-        {user?.photo && <img src={user.photo} alt="Profile" className="profile-avatar" />}
+        <h1>My Profile</h1>
+
+        <div className="profile-header-right">
+          {managedArtist && (
+            <Link to={`/artists/${managedArtist.id}`} className="btn-outline">
+              Manage My Artist Page
+            </Link>
+          )}
+          <button type="button" className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div className="profile-photo-section">
+        {user?.photo && (
+          <img src={user.photo} alt="Profile" className="profile-avatar" />
+        )}
         <ImageUploader value={user?.photo} onUploaded={handlePhotoUploaded} />
       </div>
 
-      <div className="tabs">
-        <span className="tab active">Following</span>
-        <span className="tab disabled">Order History</span>
+      <div className="profile-tabs">
+        <button
+          className={`profile-tab ${activeTab === "following" ? "active" : ""}`}
+          onClick={() => setActiveTab("following")}
+        >
+          Following
+          {following.length > 0 && (
+            <span className="tab-count">{following.length}</span>
+          )}
+        </button>
+
+        <button
+          className={`profile-tab ${activeTab === "orders" ? "active" : ""}`}
+          onClick={() => setActiveTab("orders")}
+        >
+          Order History
+          {orders.length > 0 && (
+            <span className="tab-count">{orders.length}</span>
+          )}
+        </button>
       </div>
 
-      {loading ? (
-        <p>Loading your following list...</p>
-      ) : following.length === 0 ? (
-        <p>You're not following anyone yet.</p>
-      ) : (
-        <div className="grid">
-          {following.map((artist) => (
-            <ArtistCard
-              key={artist.id}
-              artist={artist}
-              initialFollowing={true}
-              initialNotify={artist.notify_on_release}
-              showQuickView={false}
-            />
-          ))}
-        </div>
+      {activeTab === "following" && (
+        <>
+          {loading ? (
+            <p>Loading your following list...</p>
+          ) : following.length === 0 ? (
+            <p>You're not following anyone yet.</p>
+          ) : (
+            <div className="grid">
+              {following.map((artist) => (
+                <ArtistCard
+                  key={artist.id}
+                  artist={artist}
+                  onQuickView={() => setSelectedArtist(artist)}
+                  initialFollowing={true}
+                  initialNotify={artist.notify_on_release}
+                />
+              ))}
+            </div>
+          )}
+
+          <QuickViewPanel
+            artist={selectedArtist}
+            onClose={() => setSelectedArtist(null)}
+          />
+        </>
+      )}
+
+      {activeTab === "orders" && (
+        <>
+          {ordersLoading ? (
+            <p>Loading your order history...</p>
+          ) : ordersError ? (
+            <p>{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>You have not placed any orders yet.</p>
+          ) : (
+            orders.map((order) => (
+              <article className="card order-card" key={order.id}>
+                <h2>Order #{order.id}</h2>
+
+                <p>Date: {new Date(order.created_at).toLocaleDateString()}</p>
+
+                <p>Total: ${Number(order.total).toFixed(2)}</p>
+
+                <hr />
+
+                {order.items.map((item) => (
+                  <div key={item.id}>
+                    <strong>{item.name}</strong>
+
+                    <p>Quantity: {item.quantity}</p>
+
+                    <p>Price: ${Number(item.price).toFixed(2)}</p>
+                  </div>
+                ))}
+              </article>
+            ))
+          )}
+        </>
       )}
     </section>
   );
