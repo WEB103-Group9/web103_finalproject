@@ -1,7 +1,6 @@
 import { Link, useOutletContext } from "react-router-dom";
-import { useState } from "react"
-import { createOrder } from "../api.js"
-import currentUser from "../currentUser.js"
+import { useState } from "react";
+import { createOrder } from "../api.js";
 
 export default function Cart() {
   const [placingOrder, setPlacingOrder] = useState(false);
@@ -19,28 +18,27 @@ export default function Cart() {
 
   if (successMessage) {
     return (
-        <section>
+      <section>
         <h1>Order Confirmation</h1>
         <p className="success-message">{successMessage}</p>
         <Link to="/merch">Continue Shopping</Link>
-        </section>
+      </section>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-        <section>
+      <section>
         <h1>Shopping Cart</h1>
         <p>Your cart is empty.</p>
         <Link to="/merch">Continue Shopping</Link>
-        </section>
+      </section>
     );
   }
 
-
   async function handlePlaceOrder() {
     if (cartItems.length === 0 || orderSubmitted) {
-        return;
+      return;
     }
     setOrderSubmitted(true);
     setPlacingOrder(true);
@@ -48,28 +46,26 @@ export default function Cart() {
     setErrorMessage("");
 
     const orderData = {
-        user_id: currentUser.id,
-        items: cartItems.map((item) => ({
+      items: cartItems.map((item) => ({
         merch_id: item.id,
         quantity: item.quantity,
-        })),
+      })),
     };
 
     try {
-        // Custom feature: one Place Order action automatically creates 
-        // the order and all related order_items database records.
-        await createOrder(orderData);
+      // Custom feature: one Place Order action automatically creates
+      // the order and all related order_items database records.
+      await createOrder(orderData);
 
-        setSuccessMessage("Your order was placed successfully.");
-        clearCart();
+      setSuccessMessage("Your order was placed successfully.");
+      clearCart();
     } catch (error) {
-        setErrorMessage(error.message);
-        setOrderSubmitted(false);
+      setErrorMessage(error.message);
+      setOrderSubmitted(false);
     } finally {
-        setPlacingOrder(false);
+      setPlacingOrder(false);
     }
-    }
-
+  }
 
   return (
     <section>
@@ -77,23 +73,16 @@ export default function Cart() {
 
       <div className="cart-items">
         {cartItems.map((item) => {
-          const itemSubtotal =
-            Number(item.price) * item.quantity;
+          const itemSubtotal = Number(item.price) * item.quantity;
 
           return (
             <div className="card cart-item" key={item.id}>
-              <img
-                src={item.photo}
-                alt={item.name}
-                className="card-photo"
-              />
+              <img src={item.photo} alt={item.name} className="card-photo" />
 
               <div className="cart-item-details">
                 <h2>{item.name}</h2>
 
-                <p>
-                  Price: ${Number(item.price).toFixed(2)}
-                </p>
+                <p>Price: ${Number(item.price).toFixed(2)}</p>
 
                 <label>
                   Quantity:
@@ -103,21 +92,14 @@ export default function Cart() {
                     max={item.stock}
                     value={item.quantity}
                     onChange={(event) =>
-                      updateCartQuantity(
-                        item.id,
-                        event.target.value
-                      )
+                      updateCartQuantity(item.id, event.target.value)
                     }
                   />
                 </label>
 
-                <p>
-                  Available stock: {item.stock}
-                </p>
+                <p>Available stock: {item.stock}</p>
 
-                <p>
-                  Subtotal: ${itemSubtotal.toFixed(2)}
-                </p>
+                <p>Subtotal: ${itemSubtotal.toFixed(2)}</p>
 
                 <button
                   type="button"
@@ -136,25 +118,18 @@ export default function Cart() {
         <h2>Total: ${cartTotal.toFixed(2)}</h2>
 
         <button
-            type="button"
-            onClick={handlePlaceOrder}
-            disabled={
-                cartItems.length === 0 ||
-                placingOrder ||
-                orderSubmitted
-            }
-            >
-            {placingOrder
-                ? "Placing Order..."
-                : orderSubmitted
-                ? "Order Placed"
-                : "Place Order"}
+          type="button"
+          onClick={handlePlaceOrder}
+          disabled={cartItems.length === 0 || placingOrder || orderSubmitted}
+        >
+          {placingOrder
+            ? "Placing Order..."
+            : orderSubmitted
+              ? "Order Placed"
+              : "Place Order"}
         </button>
 
-        {errorMessage &&(
-            <p className="error-message">{errorMessage}</p>
-        )}
-
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
       </div>
     </section>
   );

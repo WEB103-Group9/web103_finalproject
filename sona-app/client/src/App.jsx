@@ -1,27 +1,68 @@
-import { useMemo,useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { useMemo, useEffect, useState } from "react";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 
 import logo from "./assets/sona-logo-tagline.svg";
 
 function App() {
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem("sonaCart")
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    return savedCart ? JSON.parse(savedCart): []
-  })
+  const [cartItems, setCartItems] = useState(() => {
+    const savedCart = localStorage.getItem("sonaCart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
   useEffect(() => {
-    localStorage.setItem("sonaCart", JSON.stringify(cartItems))
-  }, [cartItems])
+    localStorage.setItem("sonaCart", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/auth/login/success", {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : { success: false }))
+      .then((data) => {
+        setUser(data.success ? data.user : null);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user && location.pathname !== "/login") {
+      navigate("/login");
+    } else if (user && !user.onboarded && location.pathname !== "/onboarding") {
+      navigate("/onboarding");
+    } else if (
+      user &&
+      user.onboarded &&
+      (location.pathname === "/login" || location.pathname === "/onboarding")
+    ) {
+      navigate("/");
+    }
+  }, [user, loading, location.pathname, navigate]);
+
+  async function handleLogout() {
+    try {
+      await fetch("http://localhost:3001/auth/logout", {
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      setUser(null);
+      window.location.replace("/login");
+    }
+  }
 
   function addToCart(merch) {
     setCartItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (item) => item.id === merch.id
-      );
+      const existingItem = currentItems.find((item) => item.id === merch.id);
 
       if (existingItem) {
-        // Do not allow the cart quantity to exceed available stock.
         if (existingItem.quantity >= merch.stock) {
           return currentItems;
         }
@@ -32,7 +73,7 @@ function App() {
                 ...item,
                 quantity: item.quantity + 1,
               }
-            : item
+            : item,
         );
       }
 
@@ -52,7 +93,7 @@ function App() {
 
   function removeFromCart(merchId) {
     setCartItems((currentItems) =>
-      currentItems.filter((item) => item.id !== merchId)
+      currentItems.filter((item) => item.id !== merchId),
     );
   }
 
@@ -63,16 +104,13 @@ function App() {
           return item;
         }
 
-        const quantity = Math.max(
-          1,
-          Math.min(Number(newQuantity), item.stock)
-        );
+        const quantity = Math.max(1, Math.min(Number(newQuantity), item.stock));
 
         return {
           ...item,
           quantity,
         };
-      })
+      }),
     );
   }
 
@@ -84,20 +122,29 @@ function App() {
     () =>
       cartItems.reduce(
         (totalQuantity, item) => totalQuantity + item.quantity,
-        0
+        0,
       ),
-    [cartItems]
+    [cartItems],
   );
 
   const cartTotal = useMemo(
     () =>
       cartItems.reduce(
-        (total, item) =>
-          total + Number(item.price) * item.quantity,
-        0
+        (total, item) => total + Number(item.price) * item.quantity,
+        0,
       ),
-    [cartItems]
+    [cartItems],
   );
+
+  if (loading) return <p>Loading...</p>;
+
+  if (location.pathname === "/login" || location.pathname === "/onboarding") {
+    return <Outlet context={{ user }} />;
+  }
+
+  if (!user || !user.onboarded) {
+    return null;
+  }
 
   return (
     <>
@@ -112,11 +159,21 @@ function App() {
           </Link>
 
           <div className="nav-right">
-            <Link to="/profile">Profile</Link>
+            <Link to="/">Artists</Link>
+            <Link to="/concerts">Concerts</Link>
             <Link to="/merch">Merch</Link>
-            <Link to="/feed">Feed</Link>
+            <Link to="/feed">My Feed</Link>
             <Link to="/cart" className="cart">
-              🛒 {cartCount > 0 && <span>{cartCount}</span>}
+              🛒 {cartCount > 0 && <span>({cartCount})</span>}
+            </Link>
+            <Link to="/profile" className="nav-avatar-link">
+              {user?.avatar_url && (
+                <img
+                  src={user.avatar_url}
+                  alt={user.username}
+                  style={{ width: 32, height: 32, borderRadius: "50%" }}
+                />
+              )}
             </Link>
           </div>
         </div>
@@ -125,6 +182,8 @@ function App() {
       <main className="container">
         <Outlet
           context={{
+            user,
+            handleLogout,
             cartItems,
             addToCart,
             removeFromCart,
@@ -139,4 +198,3 @@ function App() {
 }
 
 export default App;
-

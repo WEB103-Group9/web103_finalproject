@@ -1,5 +1,5 @@
 import { useState } from "react";
-import currentUser from "../currentUser.js";
+import { useOutletContext } from "react-router-dom";
 import { followArtist, unfollowArtist } from "../api.js";
 
 export default function FollowButton({
@@ -7,6 +7,7 @@ export default function FollowButton({
   initialFollowing,
   initialNotify,
 }) {
+  const { user } = useOutletContext();
   const [following, setFollowing] = useState(initialFollowing);
   const [notify, setNotify] = useState(initialNotify);
   const [toast, setToast] = useState("");
@@ -19,12 +20,12 @@ export default function FollowButton({
   async function toggleFollow() {
     try {
       if (following) {
-        await unfollowArtist(currentUser.id, artistId);
+        await unfollowArtist(user.id, artistId);
         setFollowing(false);
         setNotify(false);
         showToast("Unfollowed");
       } else {
-        await followArtist(currentUser.id, artistId, notify);
+        await followArtist(user.id, artistId, notify);
         setFollowing(true);
         showToast("Following");
       }
@@ -36,7 +37,7 @@ export default function FollowButton({
   async function toggleNotify(event) {
     const next = event.target.checked;
     setNotify(next);
-    if (following) await followArtist(currentUser.id, artistId, next);
+    if (following) await followArtist(user.id, artistId, next);
   }
 
   return (

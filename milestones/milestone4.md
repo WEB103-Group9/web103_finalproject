@@ -14,16 +14,21 @@ This unit, be sure to complete all tasks listed below. To complete a task, place
 ## Reflection
 
 ## 1. What went well during this unit?
-Learned alot about project management and organization for coding projects and had a succesful first sprint.
+
+> We shipped a lot of real functionality like Merch, Cart/Checkout, Concerts, Following Feed, and GitHub OAuth login with a full Fan/Artist signup flow all got built out this week.
 
 ## 2. What were some challenges your group faced in this unit?
-Coordinating around issue dependencies took some time to get right with planning and thinking ahead.
+
+> Several of us were working on the same shared files at the same time, which led to some large merge conflicts near the deadline. Auth in particular touched a lot of existing files, which made merging it in alongside everyone else's work harder than expected.
 
 ## 3. Did you finish all of your tasks in your sprint plan for this week? If you did not finish all of the planned tasks, how would you prioritize the remaining tasks on your list?
-Yes. We set up our GitHub Project board, issues, and milestones, and got real backend/database work started, including both of our required one-to-one relationships and our full-CRUD entity.
+
+> Yes. We set up our GitHub Project board, issues, and milestones, and got real backend/database work started, including both of our required one-to-one relationships and our full-CRUD entity.
 
 ## 4. Which features and user stories would you consider “at risk”? How will you change your plan if those items remain “at risk”?
-Nothing is currently at risk, everything planned for this unit was finished. Going forward, the next sprints will have more complicated features so hoping the best for that.
+
+> Nothing is currently at risk, everything planned for this unit was finished. Going forward, the next sprints will have more complicated features so hoping the best for that.
 
 ## 5. What additional support will you need in upcoming units as you continue to work on your final project?
-Guidance on authentication once we reach that unit — several features (Artist Admin permissions, a real "who's logged in" concept) are currently using temporary placeholders until real login is covered in class.
+
+> Guidance on managing merge conflicts across a team working in parallel on the same files would help, especially as we head into deployment next.

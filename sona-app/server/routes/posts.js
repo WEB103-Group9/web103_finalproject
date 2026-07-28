@@ -20,6 +20,11 @@ router.get("/:id", async (req, res) => {
             ORDER BY posts.created_at DESC`,
       [id],
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.log(err);
@@ -29,7 +34,9 @@ router.get("/:id", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  const { user_id, artist_id, content } = req.body;
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+  const { artist_id, content } = req.body;
 
   if (!artist_id || !content) {
     return res.status(400).json({ error: "artist_id and content is required" });
@@ -58,7 +65,9 @@ router.patch("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
-  const { user_id, artist_id } = req.body;
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  const user_id = req.user.id;
+  const { artist_id } = req.body;
 
   if (!(await isAdminOf(user_id, artist_id))) {
     return res

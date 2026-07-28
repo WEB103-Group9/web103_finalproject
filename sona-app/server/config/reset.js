@@ -19,6 +19,9 @@ const createTables = `
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'fan',
+    github_id VARCHAR(50) UNIQUE,
+    avatar_url VARCHAR(255),
+    onboarded BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
   );
 
@@ -194,10 +197,10 @@ async function seed() {
       [artist1.id, artist2.id, artist3.id],
     );
 
-    console.log("Seeding concerts from the Ticketmaster Discovery API");
+    console.log("Seeding Ticketmaster Discovery API concerts...");
     await syncArtistConcerts();
 
-    console.log("Seeding concerts manueally");
+    console.log("Seeding concerts manually");
     await client.query(
       `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source) VALUES
         ($1, 'CFG Arena', 'Baltimore', '2026-08-01', 'www.example.com', 'manual'),
@@ -205,8 +208,8 @@ async function seed() {
         ($2, 'Capital One Area', 'Washington, D.C.', '2026-06-30', 'www.example.com', 'manual'),
         ($3, 'The Anthem', 'Washington, D.C.', '2026-06-12', 'www.example.com', 'manual')
       `,
-      [artist1.id, artist2.id, artist3.id]
-    )
+      [artist1.id, artist2.id, artist3.id],
+    );
 
     console.log("✅ Database reset and seeded successfully.");
   } catch (err) {

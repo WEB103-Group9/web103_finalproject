@@ -3,20 +3,19 @@ const BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 async function request(path, options) {
   const res = await fetch(`${BASE}/api${path}`, {
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     ...options,
   });
   if (!res.ok) {
-    let errorMessage =  `Request failed: ${res.status}`
+    let errorMessage = `Request failed: ${res.status}`;
 
-    try{
-      const errorData = await res.json()
-      errorMessage = errorData.error || errorData.message || errorMessage
-    }catch {
-
-    }
-    throw new Error(errorMessage)
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.error || errorData.message || errorMessage;
+    } catch {}
+    throw new Error(errorMessage);
   }
-  return res.status === 204 ? null: res.json()
+  return res.status === 204 ? null : res.json();
 }
 
 export const getArtists = ({ q = "", genre = "" } = {}) => {
@@ -53,12 +52,10 @@ export const followArtist = (userId, artistId, notify) =>
   });
 
 export const unfollowArtist = (userId, artistId) =>
-  request(`/follows/${artistId}?user_id=${userId}`, { method: "DELETE" });
+  request(`/follows/${artistId}`, { method: "DELETE" });
 
 export const getPostsByArtist = (artistId) =>
   request(`/artists/${artistId}/posts`);
-
-export const getPost = (postId) => request(`/posts/${postId}`);
 
 export const createPost = (userId, artistId, content) => {
   return request(`/artists/${artistId}/posts`, {
@@ -123,25 +120,31 @@ export const createOrder = (orderData) =>
     method: "POST",
     body: JSON.stringify(orderData),
   });
-export const getUserOrders = (userId) =>
-  request(`/users/${userId}/orders`);
-export const getConcerts = ({ city = ''} = {}) => {
+export const getUserOrders = (userId) => request(`/users/${userId}/orders`);
+export const getConcerts = ({ city = "" } = {}) => {
   const params = new URLSearchParams();
   if (city && typeof city === "string") {
     params.set("city", city);
   } else if (city && Array.isArray(city)) {
-    city.forEach(value => {
-      params.append("city", value)
+    city.forEach((value) => {
+      params.append("city", value);
     });
   }
   const qs = params.toString();
-  return request(`/concerts${qs ? `?${qs}` : ``}`)
-}
+  return request(`/concerts${qs ? `?${qs}` : ``}`);
+};
 
-export const getArtistConcerts = (artistId) => 
+export const getArtistConcerts = (artistId) =>
   request(`/artists/${artistId}/concerts`);
 
-export const createConcert = (userId, artistId, venue, city, date, ticketLink) => {
+export const createConcert = (
+  userId,
+  artistId,
+  venue,
+  city,
+  date,
+  ticketLink,
+) => {
   return request(`/artists/${artistId}/concerts`, {
     method: "POST",
     body: JSON.stringify({
@@ -150,10 +153,10 @@ export const createConcert = (userId, artistId, venue, city, date, ticketLink) =
       venue: venue,
       city: city,
       date: date,
-      ticket_link: ticketLink
+      ticket_link: ticketLink,
     }),
   });
-}
+};
 
 export const deleteConcert = (concertId, userId, artistId) => {
   return request(`/concerts/${concertId}`, {
@@ -163,6 +166,6 @@ export const deleteConcert = (concertId, userId, artistId) => {
       artist_id: artistId,
     }),
   });
-}
+};
 
 export const getFeed = (userId) => request(`/users/${userId}/feed`);

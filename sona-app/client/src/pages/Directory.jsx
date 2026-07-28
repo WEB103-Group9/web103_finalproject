@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { getArtists, getFollowing } from "../api.js";
-import currentUser from "../currentUser.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
 
 export default function Directory() {
+  const { user } = useOutletContext();
   const [artists, setArtists] = useState([]);
   const [followMap, setFollowMap] = useState({});
   const [followLoaded, setFollowLoaded] = useState(false);
@@ -29,7 +30,7 @@ export default function Directory() {
   }, [q, selectedGenre]);
 
   useEffect(() => {
-    getFollowing(currentUser.id).then((rows) => {
+    getFollowing(user.id).then((rows) => {
       const map = {};
       for (const row of rows) {
         map[row.id] = { following: true, notify: row.notify_on_release };
@@ -37,7 +38,7 @@ export default function Directory() {
       setFollowMap(map);
       setFollowLoaded(true);
     });
-  }, []);
+  }, [user.id]);
 
   const ready = !loading && followLoaded;
 
