@@ -46,7 +46,7 @@ function App() {
 
   async function handleLogout() {
     try {
-      await fetch("http://`${import.meta.env.VITE_API_URL}/auth/logout", {
+      await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
         credentials: "include",
       });
     } catch (error) {
