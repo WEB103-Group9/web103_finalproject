@@ -9,6 +9,8 @@ import {
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
 
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function Profile() {
   const { user, setUser, handleLogout } = useOutletContext();
   const [following, setFollowing] = useState([]);
@@ -47,7 +49,7 @@ export default function Profile() {
 
     try {
       const res = await fetch(
-        "https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload",
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: "POST", body: formData },
       );
       const data = await res.json();
@@ -90,6 +92,16 @@ export default function Profile() {
             <Link to={`/artists/${managedArtist.id}`} className="btn-outline">
               Manage My Artist Page
             </Link>
+          )}
+          {user?.spotify_connected ? (
+            <span className="badge">Spotify Connected</span>
+          ) : (
+            <a
+              href={`${BASE}/api/spotify/authorize?user_id=${user.id}`}
+              className="btn"
+            >
+              Connect Spotify
+            </a>
           )}
           <button type="button" className="logout-btn" onClick={handleLogout}>
             Logout
