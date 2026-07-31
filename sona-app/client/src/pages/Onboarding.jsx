@@ -11,7 +11,7 @@ export default function Onboarding() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_URL}/auth/login/success", {
+    fetch(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -25,7 +25,7 @@ export default function Onboarding() {
 
     try {
       const res = await fetch(
-        "${import.meta.env.VITE_API_URL}/auth/onboarding",
+        `${import.meta.env.VITE_API_URL}/auth/onboarding`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -61,7 +61,7 @@ export default function Onboarding() {
             className="onboarding-avatar"
           />
           <a
-            href="${import.meta.env.VITE_API_URL}/auth/logout"
+            href={import.meta.env.VITE_API_URL + "/auth/logout"}
             className="onboarding-logout-link"
           >
             Not {currentUser.username}? Logout
