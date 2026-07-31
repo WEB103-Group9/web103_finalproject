@@ -14,12 +14,14 @@ import {
   deleteArtist,
   getPostsByArtist,
   getArtistMerch,
+  getArtistConcerts
 } from "../api.js";
 import FollowButton from "../components/FollowButton.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
 import CreateMerchForm from "../components/CreateMerchForm.jsx";
 import Toast from "../components/Toast.jsx";
+import ConcertTable from "../components/ConcertTable.jsx";
 
 function Social({ label, value }) {
   if (!value) return null;
@@ -56,6 +58,9 @@ export default function ArtistDetail() {
   const [merch, setMerch] = useState([]);
   const [merchLoading, setMerchLoading] = useState(true);
   const [showCreateMerch, setShowCreateMerch] = useState(false);
+  const [concerts, setConcerts] = useState([]);
+  const [addRow, setAddRow] = useState(false);
+  const [newRowSubmitted, setNewRowSubmitted] = useState(false)
 
   let new_post = searchParams.get("new_post") === "true";
 
@@ -82,6 +87,7 @@ export default function ArtistDetail() {
     getArtistMerch(id)
       .then(setMerch)
       .finally(() => setMerchLoading(false));
+    getArtistConcerts(id).then(setConcerts);
   }, [id]);
 
   useEffect(() => {
@@ -115,6 +121,18 @@ export default function ArtistDetail() {
     setToast(message);
     setTimeout(() => setToast(""), 2000);
   }
+
+  const handleAddRow = () => {
+    const newConcert = {
+        artist_id: artist.id,
+        venue: '',
+        city: '',
+        date: '',
+        ticket_link: "",
+        source: "manual"
+    }
+    setConcerts([...concerts, newConcert]);
+  };
 
   return (
     <article>
@@ -217,9 +235,32 @@ export default function ArtistDetail() {
           )}
         </div>
 
-        <div className="detail-side">
-          <h2>Concerts</h2>
-          <p className="placeholder">Concerts table — coming soon (Issue 8)</p>
+        <div className={isAdmin ? "detail-side concert-admin-view" : "detail-side"} >
+          <div className="concerts-titlebar">
+            <h2>Concerts</h2>
+            { isAdmin && (
+              <button className="btn"
+                onClick={() => {
+                  setAddRow(true)
+                  handleAddRow()
+                }}
+                disabled={addRow}
+              >
+                Add Concert
+              </button>
+            )}
+          </div>
+          {concerts.length > 0 ?
+            (<ConcertTable
+              concerts={concerts}
+              setConcerts={setConcerts}
+              isAdmin={isAdmin}
+              addRow={addRow}
+              setAddRow={setAddRow}
+            />) : (
+              <p className="placeholder">No upcoming concerts.</p>
+            )
+          }
         </div>
       </div>
 

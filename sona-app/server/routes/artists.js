@@ -273,8 +273,9 @@ router.get("/:id/concerts", async (req, res) => {
   
   try {
     const result = await pool.query(
-      `SELECT artists.id,
+      `SELECT artists.id AS artist_id,
               artists.name,
+              concerts.id AS concert_id,
               concerts.venue,
               concerts.city,
               concerts.date,
@@ -283,7 +284,7 @@ router.get("/:id/concerts", async (req, res) => {
       FROM artists
       JOIN concerts ON artists.id = concerts.artist_id
       WHERE artist_id = $1
-      ORDER BY concerts.date DESC`,
+      ORDER BY concerts.date ASC`,
       [id]
     )
     res.json(result.rows)
@@ -313,7 +314,8 @@ router.post("/:id/concerts", async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
-        VALUES ($1, $2, $3, $4, $5, "manual")`,
+        VALUES ($1, $2, $3, $4, $5, 'manual')
+        RETURNING *`,
       [artist_id, venue, city, date, ticket_link]
     )
     res.status(201).json(result.rows[0])

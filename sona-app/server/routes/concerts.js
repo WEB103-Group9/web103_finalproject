@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
 
         const where = conditions.length ? `WHERE ${conditions.join(' OR ')}` : ``;
 
-        const result = await pool.query(`SELECT  * FROM concerts ${where}`, values)
+        const result = await pool.query(`SELECT  * FROM concerts ${where} ORDER BY date ASC`, values)
         res.json(result.rows);
     } catch (err) {
         console.log(err)
