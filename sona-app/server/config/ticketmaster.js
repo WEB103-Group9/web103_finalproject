@@ -44,6 +44,7 @@ export async function syncArtistConcerts() {
     try {
       const attractionId = await getAttractionId(artist.name);
       // console.log(attractionId)
+      let prevConcertDate = null;
       if (attractionId != null) {
         const concerts = await getConcerts(attractionId);
         for (const concert of concerts) {
@@ -53,16 +54,18 @@ export async function syncArtistConcerts() {
           const date = concert.dates.start.localDate;
           const ticketLink = concert.url;
 
-          const concertDateObj = new Date(date);
-          if (concertDateObj >= todayDate) {
+          const concertDateObj = new Date(date)
+          if ((concertDateObj >= todayDate) && (date != prevConcertDate)) {
             await pool.query(
               `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
-                  VALUES ($1, $2, $3, $4, $5, 'api')
-                  RETURNING *
-                `,
+                VALUES ($1, $2, $3, $4, $5, 'api')
+                RETURNING *
+              `,
               [artist.id, venueName, city, date, ticketLink],
-            );
+          )
           }
+
+          prevConcertDate = date;
         }
       }
     } catch (err) {

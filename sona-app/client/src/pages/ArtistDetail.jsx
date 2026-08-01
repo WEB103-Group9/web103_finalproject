@@ -24,6 +24,7 @@ import ArtistAbout from "../components/ArtistAbout.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
 import Toast from "../components/Toast.jsx";
+import ConcertTable from "../components/ConcertTable.jsx";
 
 export default function ArtistDetail() {
   const { user } = useOutletContext();
@@ -43,6 +44,8 @@ export default function ArtistDetail() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [concerts, setConcerts] = useState([]);
   const [concertsLoading, setConcertsLoading] = useState(true);
+  const [addRow, setAddRow] = useState(false);
+  const [newRowSubmitted, setNewRowSubmitted] = useState(false)
 
   let new_post = searchParams.get("new_post") === "true";
 
@@ -97,6 +100,18 @@ export default function ArtistDetail() {
     setToast(message);
     setTimeout(() => setToast(""), 2000);
   }
+
+  const handleAddRow = () => {
+    const newConcert = {
+        artist_id: artist.id,
+        venue: '',
+        city: '',
+        date: '',
+        ticket_link: "",
+        source: "manual"
+    }
+    setConcerts([...concerts, newConcert]);
+  };
 
   return (
     <article>
