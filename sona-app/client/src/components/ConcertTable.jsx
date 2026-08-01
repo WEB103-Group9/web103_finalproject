@@ -1,31 +1,22 @@
-import { createConcert, deleteConcert } from "../api.js";
-import currentUser from "../currentUser";
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { getArtistConcerts, createConcert, deleteConcert } from "../api.js";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { useState, useEffect, useLayoutEffect } from "react";
 
-export default function ConcertTable({concerts, setConcerts, isAdmin, addRow, setAddRow}) {
-    const artistId = concerts[0].artist_id;
-    const [visibleNumOfRows, setVisibleNumOfRows] = useState(4);
+export default function ConcertTable({
+    artistId,
+    isFirstConcert, setIsFirstConcert,
+    concerts, setConcerts,
+    addRow, setAddRow
+}) {
+    const { user } = useOutletContext();
     const [errors, setErrors] = useState([]);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (isAdmin) setVisibleNumOfRows(concerts.length);
-    }, [isAdmin])
-
+    
     function isValidDate(dateObj) {
         return (
             Object.prototype.toString.call(dateObj) === "[object Date]" && 
             !isNaN(dateObj.getTime())
         );
-    }
-
-    const handleShowMore = () => {
-        setVisibleNumOfRows(concerts.length);
-    }
-
-    const handleShowLess = () => {
-        setVisibleNumOfRows(4);
     }
 
     const handleChange = (index, event) => {
@@ -62,9 +53,9 @@ export default function ConcertTable({concerts, setConcerts, isAdmin, addRow, se
             validationErrors.push("The ticket link is missing.");
         } else {
             try {
-                new URL(newConcert.ticket_link.trim());
+                const url = new URL(newConcert.ticket_link.trim());
             } catch {
-                validationErrors.push("Please check that the ticket link is a valid URL.");
+                validationErrors.push("Please check that the ticket link is a valid URL. The link must include https or http protocol. Example: https://example.com");
             }
         }
 
@@ -75,17 +66,18 @@ export default function ConcertTable({concerts, setConcerts, isAdmin, addRow, se
 
         const dateStr = new Date(newConcert.date.trim()).toISOString();
         try {
-            const createdConcert = await createConcert(
-                currentUser.id,
+            // console.log("trying to insert new concert")
+            await createConcert(
+                user.id,
                 artistId,
                 newConcert.venue,
                 newConcert.city,
                 dateStr,
                 newConcert.ticket_link
             );
-            setConcerts((prev) => [...prev, createdConcert]);
             setErrors([]);
             setAddRow(false);
+            setIsFirstConcert(false);
             navigate(`/artists/${artistId}`);
         } catch (error) {
             console.log(error);
@@ -93,9 +85,17 @@ export default function ConcertTable({concerts, setConcerts, isAdmin, addRow, se
         }
     };
 
+    const handleCancel = async () => {
+        setAddRow(false);
+        setErrors([]);
+        const updatedConcerts = [...concerts];
+        updatedConcerts.splice(-1, 1);
+        setConcerts(updatedConcerts);
+    }
+
     async function handleDelete(concertId, date) {
         if (!confirm(`Delete the ${date} concert?`)) return;
-        await deleteConcert(concertId, currentUser.id, artistId);
+        await deleteConcert(concertId, user.id, artistId);
         navigate(0);
     }
 
@@ -106,106 +106,96 @@ return (
                 {error}
             </p>
         ))}
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Source</th>
-                    <th>Venue</th>
-                    <th>City</th>
-                    <th>Date</th>
-                    <th>Tickets</th>
-                    {isAdmin && !addRow && (<th>Delete?</th>)}
-                </tr>
-            </thead>
-            <tbody>
-                {concerts.slice(0, visibleNumOfRows).map((concert) => {
-                    // console.log(concert)
-                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                    const formattedDate = new Intl.DateTimeFormat('en-US', options)
-                                            .format(new Date(concert.date)); 
-                    return (
-                        <tr key={concert.concert_id}>
-                            <td>
-                                <div className="badge">
-                                    {concert.source === "manual" ? "Artist" : "Ticketmaster"}
-                                </div>
-                            </td>
-                            <td>{concert.venue}
-                            </td>
-                            <td>{concert.city}</td>
-                            <td>{formattedDate}</td>
-                            <td>
-                                <Link role="button" className="btn" to={concert.ticket_link}>
-                                    Get Tickets
-                                </Link>
-                            </td>
-                            {isAdmin && !addRow && (
-                                <td>
-                                    <button className="btn-danger btn" onClick={() => handleDelete(concert.concert_id, formattedDate)}>Delete</button>
-                                </td>
-                            )}
-                        </tr>
-                    )
-                })}
-                
-                {addRow && isAdmin && (
+{console.log(concerts)}
+        {concerts &&
+            <table>
+                <thead>
                     <tr>
-                        <td>
-                            <input type="text" name="source" placeholder="Artist" disabled />
-                        </td>
-                        <td>
-                            <input type="text" id="venue" name="venue"
-                                value={concerts.at(-1)?.venue}
-                                onChange={(event) => handleChange(concerts.length - 1, event)}
-                            />
-                        </td>
-                        <td>
-                            <input type="text" id="city" name="city"
-                                value={concerts.at(-1)?.city}
-                                onChange={(event) => handleChange(concerts.length - 1, event)}
-                            />
-                        </td>
-                        <td>
-                            <input type="text" name="date" id="date"
-                                value={concerts.at(-1)?.date}
-                                onChange={(event) => handleChange(concerts.length - 1, event)}
-                            />
-                        </td>
-                        <td>
-                            <input type="text" name="ticket_link" id="ticket_link"
-                                value={concerts.at(-1)?.ticket_link}
-                                onChange={(event) => handleChange(concerts.length - 1, event)}
-                            />
-                        </td>
-                        {/* <td>
-                            <button className="btn-danger btn" onClick={() => handleDelete(concert.concert_id, formattedDate)}>Delete</button>
-                        </td> */}
+                        <th>Source</th>
+                        <th>Venue</th>
+                        <th>City</th>
+                        <th>Date</th>
+                        <th>Tickets</th>
+                        {!addRow && (<th>Delete?</th>)}
                     </tr>
-                )}
+                </thead>
+                <tbody>
+                    {/* {console.log(concerts.length === 1 ? concerts.slice(0) : concerts.slice(0, -1))} */}
+                    {!isFirstConcert && (addRow ? concerts.slice(0, -1) : concerts).map((concert) => {
+                        // console.log(concert)
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        const formattedDate = new Intl.DateTimeFormat('en-US', options)
+                                                .format(new Date(concert.date)); 
+                        return (
+                            <tr key={concert.concert_id}>
+                                <td>
+                                    <div className="badge">
+                                        {concert.source === "manual" ? "Artist" : "Ticketmaster"}
+                                    </div>
+                                </td>
+                                <td>{concert.venue}
+                                </td>
+                                <td>{concert.city}</td>
+                                <td>{formattedDate}</td>
+                                <td>
+                                    <Link role="button" className="btn" to={concert.ticket_link}>
+                                        Get Tickets
+                                    </Link>
+                                </td>
+                                {!addRow && (
+                                    <td>
+                                        <button className="btn-danger btn" onClick={() => handleDelete(concert.concert_id, formattedDate)}>Delete</button>
+                                    </td>
+                                )}
+                            </tr>
+                        )
+                    })}
+                    
+                    {addRow && (
+                        <tr>
+                            <td>
+                                <input type="text" name="source" placeholder="Artist" disabled />
+                            </td>
+                            <td>
+                                <input type="text" id="venue" name="venue"
+                                    value={concerts.at(-1)?.venue}
+                                    onChange={(event) => handleChange(concerts.length - 1, event)}
+                                />
+                            </td>
+                            <td>
+                                <input type="text" id="city" name="city"
+                                    value={concerts.at(-1)?.city}
+                                    onChange={(event) => handleChange(concerts.length - 1, event)}
+                                />
+                            </td>
+                            <td>
+                                <input type="text" name="date" id="date"
+                                    value={concerts.at(-1)?.date}
+                                    onChange={(event) => handleChange(concerts.length - 1, event)}
+                                />
+                            </td>
+                            <td>
+                                <input type="text" name="ticket_link" id="ticket_link"
+                                    value={concerts.at(-1)?.ticket_link}
+                                    onChange={(event) => handleChange(concerts.length - 1, event)}
+                                />
+                            </td>
+                            {/* <td>
+                                <button className="btn-danger btn" onClick={() => handleDelete(concert.concert_id, formattedDate)}>Delete</button>
+                            </td> */}
+                        </tr>
+                    )}
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        }
 
-        {addRow && isAdmin && (
+        {addRow && (
             <div className="admin-controls">
                 <button className="btn" onClick={handleSubmit}>Submit</button>
-                <button className="btn-outline"
-                    onClick={() => {
-                        setAddRow(false);
-                        setErrors([]);
-                }}>
-                    Cancel
-                </button>
+                <button className="btn-outline" onClick={handleCancel}>Cancel</button>
             </div>
         )}
-
-        {(concerts.length > visibleNumOfRows) && (!isAdmin) &&
-            <button className="btn-show" onClick={handleShowMore}>Show More</button>
-        }
-        {(visibleNumOfRows == concerts.length) && (!isAdmin) &&
-            <button className="btn-show" onClick={handleShowLess}>Show Less</button>
-        }
     </div>
 )
 }

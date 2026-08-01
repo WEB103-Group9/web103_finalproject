@@ -44,8 +44,6 @@ export default function ArtistDetail() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [concerts, setConcerts] = useState([]);
   const [concertsLoading, setConcertsLoading] = useState(true);
-  const [addRow, setAddRow] = useState(false);
-  const [newRowSubmitted, setNewRowSubmitted] = useState(false)
 
   let new_post = searchParams.get("new_post") === "true";
 
@@ -101,18 +99,6 @@ export default function ArtistDetail() {
     setTimeout(() => setToast(""), 2000);
   }
 
-  const handleAddRow = () => {
-    const newConcert = {
-        artist_id: artist.id,
-        venue: '',
-        city: '',
-        date: '',
-        ticket_link: "",
-        source: "manual"
-    }
-    setConcerts([...concerts, newConcert]);
-  };
-
   return (
     <article>
       <div className="detail-hero">
@@ -167,7 +153,7 @@ export default function ArtistDetail() {
 
       <div className="detail-grid">
         <ArtistAbout artist={artist} />
-        <ArtistConcertsList artistId={id} />
+        <ArtistConcertsList artistId={id} isAdmin={isAdmin} />
       </div>
 
       <section>
