@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch server.js",
-    "reset-db": "node config/reset.js"
+    "reset-db": "node config/reset.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
