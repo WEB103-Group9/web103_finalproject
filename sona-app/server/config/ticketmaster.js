@@ -55,7 +55,7 @@ export async function syncArtistConcerts() {
           const ticketLink = concert.url;
 
           const concertDateObj = new Date(date)
-          if ((concertDateObj >= todayDate) && (date != prevConcertDate)) {
+          if ((concertDateObj.getTime() >= todayDate.getTime()) && (date != prevConcertDate)) {
             await pool.query(
               `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source)
                 VALUES ($1, $2, $3, $4, $5, 'api')

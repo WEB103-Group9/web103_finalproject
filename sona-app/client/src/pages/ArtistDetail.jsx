@@ -24,7 +24,6 @@ import ArtistAbout from "../components/ArtistAbout.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
 import Toast from "../components/Toast.jsx";
-import ConcertTable from "../components/ConcertTable.jsx";
 
 export default function ArtistDetail() {
   const { user } = useOutletContext();

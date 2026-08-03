@@ -28,7 +28,6 @@ export default function ArtistConcertsList({ artistId, isAdmin }) {
         source: "manual"
     }
     setConcerts([...concerts, newConcert]);
-    {console.log("handle new row")}
   };
 
   return (
@@ -64,7 +63,7 @@ export default function ArtistConcertsList({ artistId, isAdmin }) {
       ) : (
         <div className="concerts-scroll">
           {concerts.map((concert) => (
-            <div key={concert.id} className="concert-row">
+            <div key={concert.concert_id} className="concert-row">
               <div className="concert-row-info">
                 <strong>{concert.venue}</strong>
                 <span className="concert-row-city">{concert.city}</span>

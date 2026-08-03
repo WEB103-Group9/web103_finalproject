@@ -1,6 +1,6 @@
 import { getArtistConcerts, createConcert, deleteConcert } from "../api.js";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function ConcertTable({
     artistId,
@@ -78,10 +78,10 @@ export default function ConcertTable({
             setErrors([]);
             setAddRow(false);
             setIsFirstConcert(false);
-            navigate(`/artists/${artistId}`);
+            // navigate(0);
         } catch (error) {
-            console.log(error);
-            setErrors(["Something went wrong. You don't have permission to post here."]);
+            // console.log(error);
+            setErrors(["Something went wrong. " + error.message]);
         }
     };
 
@@ -106,8 +106,7 @@ return (
                 {error}
             </p>
         ))}
-{console.log(concerts)}
-        {concerts &&
+        {concerts.length > 0 &&
             <table>
                 <thead>
                     <tr>
@@ -120,7 +119,6 @@ return (
                     </tr>
                 </thead>
                 <tbody>
-                    {/* {console.log(concerts.length === 1 ? concerts.slice(0) : concerts.slice(0, -1))} */}
                     {!isFirstConcert && (addRow ? concerts.slice(0, -1) : concerts).map((concert) => {
                         // console.log(concert)
                         const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -138,7 +136,7 @@ return (
                                 <td>{concert.city}</td>
                                 <td>{formattedDate}</td>
                                 <td>
-                                    <Link role="button" className="btn" to={concert.ticket_link}>
+                                    <Link role="button" className="btn" to={concert.ticket_link} target="_blank" rel="noreferrer">
                                         Get Tickets
                                     </Link>
                                 </td>
