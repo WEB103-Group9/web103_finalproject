@@ -22,6 +22,7 @@ const createTables = `
     photo VARCHAR(255),
     github_id VARCHAR(50) UNIQUE,
     avatar_url VARCHAR(255),
+    spotify_playlist_id VARCHAR(100),  // this one stays too!
     onboarded BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
   );
