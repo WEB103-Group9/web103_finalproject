@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import pgSession from "connect-pg-simple";
+import pool from "./config/database.js";
 import passport from "passport";
 import "./config/dotenv.js";
 import { GitHub } from "./config/auth.js";
@@ -29,12 +31,17 @@ app.use(express.json());
 
 app.use(
   session({
+    store: new pgSession({
+      pool: pool,
+      createTableIfMissing: true,
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
       secure: true,
       sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
   }),
 );
