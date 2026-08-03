@@ -19,6 +19,7 @@ import spotifyRouter from "./routes/spotify.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const pgSession = connectPgSimple(session);
 
 app.use(
   cors({
