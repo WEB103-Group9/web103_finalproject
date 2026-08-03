@@ -6,7 +6,7 @@ const router = express.Router();
 
 const SCOPES = ["user-read-email", "playlist-modify-private"].join(" ");
 
-// GET /api/spotify/authorize?user_id=1
+// GET /api/spotify/authorize
 router.get("/authorize", (req, res) => {
   if (!req.user) {
     return res.status(401).json({ error: "Not logged in" });
@@ -87,3 +87,4 @@ router.get("/callback", async (req, res) => {
 });
 
 export default router;
+
