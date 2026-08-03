@@ -7,7 +7,9 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      `SELECT id, username, role, photo FROM users WHERE id = $1`,
+      `SELECT id, username, role, photo,
+              (spotify_access_token IS NOT NULL) AS spotify_connected
+       FROM users WHERE id = $1`,
       [id],
     );
     if (result.rows.length === 0) {

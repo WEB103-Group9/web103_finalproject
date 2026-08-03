@@ -5,9 +5,12 @@ import {
   getUserOrders,
   getAdminOf,
   updateUserPhoto,
+  getUser,
 } from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export default function Profile() {
   const { user, setUser, handleLogout } = useOutletContext();
@@ -29,6 +32,9 @@ export default function Profile() {
       .catch((error) => setOrdersError(error.message))
       .finally(() => setOrdersLoading(false));
     getAdminOf(user.id).then(setManagedArtist);
+    getUser(user.id).then((freshUser) =>
+      setUser((prev) => ({ ...prev, ...freshUser })),
+    );
   }, [user.id]);
 
   async function handlePhotoUploaded(url) {
@@ -47,7 +53,7 @@ export default function Profile() {
 
     try {
       const res = await fetch(
-        "https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload",
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: "POST", body: formData },
       );
       const data = await res.json();
@@ -90,6 +96,16 @@ export default function Profile() {
             <Link to={`/artists/${managedArtist.id}`} className="btn-outline">
               Manage My Artist Page
             </Link>
+          )}
+          {user?.spotify_connected ? (
+            <span className="badge">Spotify Connected</span>
+          ) : (
+            <a
+              href={`${BASE}/api/spotify/authorize?user_id=${user.id}`}
+              className="btn"
+            >
+              Connect Spotify
+            </a>
           )}
           <button type="button" className="logout-btn" onClick={handleLogout}>
             Logout
