@@ -6,6 +6,7 @@ const options = {
   clientID: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: `${process.env.SERVER_URL}/auth/github/callback`,
+  proxy: true,
 };
 
 const verify = async (accessToken, refreshToken, profile, callback) => {

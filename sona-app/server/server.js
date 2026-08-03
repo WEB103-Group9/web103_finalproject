@@ -6,7 +6,6 @@ import pool from "./config/database.js";
 import passport from "passport";
 import "./config/dotenv.js";
 import { GitHub } from "./config/auth.js";
-
 import artistsRouter from "./routes/artists.js";
 import usersRouter from "./routes/users.js";
 import followsRouter from "./routes/follows.js";
@@ -21,6 +20,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const pgSession = connectPgSimple(session);
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -30,8 +31,6 @@ app.use(
 );
 app.use(express.json());
 
-app.set("trust proxy", 1);
-
 app.use(
   session({
     store: new pgSession({
@@ -40,7 +39,7 @@ app.use(
     }),
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
