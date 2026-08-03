@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import session from "express-session";
-import pgSession from "connect-pg-simple";
+import connectPgSimple from "connect-pg-simple";
 import pool from "./config/database.js";
 import passport from "passport";
 import "./config/dotenv.js";
