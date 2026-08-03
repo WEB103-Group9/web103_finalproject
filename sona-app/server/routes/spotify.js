@@ -8,7 +8,6 @@ const SCOPES = ["user-read-email", "playlist-modify-private"].join(" ");
 
 // GET /api/spotify/authorize?user_id=1
 router.get("/authorize", (req, res) => {
-  const { user_id } = req.query;
   if (!req.user) {
     return res.status(401).json({ error: "Not logged in" });
   }

@@ -5,6 +5,7 @@ import {
   getUserOrders,
   getAdminOf,
   updateUserPhoto,
+  getUser,
 } from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
@@ -23,11 +24,18 @@ export default function Profile() {
   const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
-  getFollowing(user.id).then(setFollowing).finally(() => setLoading(false));
-  getUserOrders(user.id).then(setOrders).catch((error) => setOrdersError(error.message)).finally(() => setOrdersLoading(false));
-  getAdminOf(user.id).then(setManagedArtist);
-  getUser(user.id).then((freshUser) => setUser((prev) => ({ ...prev, ...freshUser })));
-}, [user.id]);
+    getFollowing(user.id)
+      .then(setFollowing)
+      .finally(() => setLoading(false));
+    getUserOrders(user.id)
+      .then(setOrders)
+      .catch((error) => setOrdersError(error.message))
+      .finally(() => setOrdersLoading(false));
+    getAdminOf(user.id).then(setManagedArtist);
+    getUser(user.id).then((freshUser) =>
+      setUser((prev) => ({ ...prev, ...freshUser })),
+    );
+  }, [user.id]);
 
   async function handlePhotoUploaded(url) {
     await updateUserPhoto(user.id, url);

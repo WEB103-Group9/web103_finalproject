@@ -24,6 +24,7 @@ const createTables = `
     spotify_access_token TEXT,
     spotify_refresh_token TEXT,
     spotify_token_expires_at TIMESTAMP,
+    spotify_playlist_id VARCHAR(100),
     avatar_url VARCHAR(255),
     onboarded BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
