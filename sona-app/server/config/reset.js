@@ -97,7 +97,8 @@ const createTables = `
   CREATE TABLE concerts (
     id SERIAL PRIMARY KEY,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
-    venue VARCHAR(50),
+    concert_name VARCHAR(80),
+    venue VARCHAR(50) NOT NULL,
     city VARCHAR(24) NOT NULL,
     date DATE NOT NULL,
     ticket_link VARCHAR(2083) NOT NULL,

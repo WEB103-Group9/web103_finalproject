@@ -257,18 +257,30 @@ router.get("/:id/concerts", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT artists.id AS artist_id,
+      `WITH cleaned_concert_data AS (
+        SELECT *,
+            ROW_NUMBER() OVER (
+              PARTITION BY
+                artist_id,
+                date,
+                REGEXP_REPLACE(LOWER(TRIM(venue)), '[^a-z0-9]', '', 'g')
+               ORDER BY REGEXP_REPLACE(concert_name, '[^a-z0-9]', '', 'g') ASC
+            ) AS row_num
+        FROM concerts
+      )
+      
+      SELECT artists.id AS artist_id,
               artists.name,
-              concerts.id AS concert_id,
-              concerts.venue,
-              concerts.city,
-              concerts.date,
-              concerts.ticket_link,
-              concerts.source
+              cleaned_concert_data.id AS concert_id,
+              cleaned_concert_data.venue,
+              cleaned_concert_data.city,
+              cleaned_concert_data.date,
+              cleaned_concert_data.ticket_link,
+              cleaned_concert_data.source
       FROM artists
-      JOIN concerts ON artists.id = concerts.artist_id
-      WHERE artist_id = $1
-      ORDER BY concerts.date ASC`,
+      JOIN cleaned_concert_data ON artists.id = cleaned_concert_data.artist_id
+      WHERE artist_id = $1 AND cleaned_concert_data.row_num = 1
+      ORDER BY cleaned_concert_data.date ASC`,
       [id],
     );
     res.json(result.rows);
