@@ -1,3 +1,17 @@
+function getSpotifyEmbedUrl(spotifyUrl) {
+  if (!spotifyUrl) return null;
+  try {
+    const url = new URL(spotifyUrl);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    if (pathParts.length < 2) return null;
+    const [type, id] = pathParts;
+    if (!["artist", "track", "album", "playlist"].includes(type)) return null;
+    return `https://open.spotify.com/embed/${type}/${id}`;
+  } catch {
+    return null;
+  }
+}
+
 function Social({ label, value }) {
   if (!value) return null;
   return (
@@ -8,6 +22,8 @@ function Social({ label, value }) {
 }
 
 export default function ArtistAbout({ artist }) {
+  const embedUrl = getSpotifyEmbedUrl(artist.spotify);
+
   return (
     <div className="detail-about">
       <h2>About</h2>
@@ -20,15 +36,16 @@ export default function ArtistAbout({ artist }) {
         <Social label="TT" value={artist.tiktok} />
       </div>
 
-      {artist.spotify ? (
-        <a
-          href={artist.spotify}
-          target="_blank"
-          rel="noreferrer"
+      {embedUrl ? (
+        <iframe
           className="spotify-embed"
-        >
-          Open on Spotify
-        </a>
+          src={embedUrl}
+          width="100%"
+          height="352"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        ></iframe>
       ) : (
         <div className="spotify-embed">Spotify Embed Placeholder</div>
       )}
