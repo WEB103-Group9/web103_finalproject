@@ -18,7 +18,7 @@ function App() {
   }, [cartItems]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
+    fetch(`${import.meta.env.VITE_API_URL || ""}/auth/login/success`, {
       credentials: "include",
     })
       .then((res) => (res.ok ? res.json() : { success: false }))
@@ -46,7 +46,7 @@ function App() {
 
   async function handleLogout() {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ""}/auth/logout`, {
         credentials: "include",
       });
     } catch (error) {
