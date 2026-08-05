@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { getArtists, getFollowing } from "../api.js";
 import ArtistCard from "../components/ArtistCard.jsx";
 import QuickViewPanel from "../components/QuickViewPanel.jsx";
+import Spinner from "../components/Spinner.jsx";
 
 export default function Directory() {
   const { user } = useOutletContext();
@@ -57,7 +58,7 @@ export default function Directory() {
           value={selectedGenre}
           onChange={(event) => setSelectedGenre(event.target.value)}
         >
-          <option value="">Genre Dropdown</option>
+          <option value="">All Genres</option>
           {genreOptions.map((option) => (
             <option key={option} value={option}>
               {option}
@@ -67,7 +68,7 @@ export default function Directory() {
       </div>
 
       {!ready ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : artists.length === 0 ? (
         <p>No artists found.</p>
       ) : (

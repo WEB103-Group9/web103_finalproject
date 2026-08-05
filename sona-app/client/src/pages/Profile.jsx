@@ -100,10 +100,7 @@ export default function Profile() {
           {user?.spotify_connected ? (
             <span className="badge">Spotify Connected</span>
           ) : (
-            <a
-              href={`${BASE}/api/spotify/authorize?user_id=${user.id}`}
-              className="btn"
-            >
+            <a href="/api/spotify/authorize?user_id=${user.id}" className="btn">
               Connect Spotify
             </a>
           )}

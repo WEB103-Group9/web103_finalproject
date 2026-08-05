@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getConcerts } from "../api.js";
+import Spinner from "../components/Spinner.jsx";
 
 export default function Concerts() {
   const [concerts, setConcerts] = useState([]);
@@ -59,7 +60,7 @@ export default function Concerts() {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : concerts.length === 0 ? (
         <p>No upcoming concerts found.</p>
       ) : (

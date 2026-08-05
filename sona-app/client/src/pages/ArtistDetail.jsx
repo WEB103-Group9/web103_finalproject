@@ -27,7 +27,7 @@ import Spinner from "../components/Spinner.jsx";
 import Toast from "../components/Toast.jsx";
 
 export default function ArtistDetail() {
-  const { user } = useOutletContext();
+  const { user, addToCart } = useOutletContext();
   const { id } = useParams();
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
@@ -243,12 +243,15 @@ export default function ArtistDetail() {
                   key={item.id}
                   merch={item}
                   isAdmin={isAdmin}
+                  addToCart={(merch) => {
+                    addToCart(merch);
+                    showToast(`Added ${merch.name} to cart`);
+                  }}
                   onUpdated={(updated) => {
                     setMerch((prev) =>
                       prev.map((m) => (m.id === updated.id ? updated : m)),
                     );
-                    setToast("Merch updated!");
-                    setTimeout(() => setToast(""), 3000);
+                    showToast("Merch updated!");
                   }}
                   onDeleted={(deletedId) => {
                     setMerch((prev) => prev.filter((m) => m.id !== deletedId));

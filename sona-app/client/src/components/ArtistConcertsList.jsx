@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getArtistConcerts } from "../api.js";
 import ConcertTable from "./ConcertTable.jsx";
+import Spinner from "./Spinner.jsx";
 
 export default function ArtistConcertsList({ artistId, isAdmin }) {
   const [concerts, setConcerts] = useState([]);
@@ -20,13 +21,13 @@ export default function ArtistConcertsList({ artistId, isAdmin }) {
     setAddRow(true);
 
     const newConcert = {
-        artist_id: Number(artistId),
-        venue: '',
-        city: '',
-        date: '',
-        ticket_link: "",
-        source: "manual"
-    }
+      artist_id: Number(artistId),
+      venue: "",
+      city: "",
+      date: "",
+      ticket_link: "",
+      source: "manual",
+    };
     setConcerts([...concerts, newConcert]);
   };
 
@@ -42,7 +43,7 @@ export default function ArtistConcertsList({ artistId, isAdmin }) {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : isAdmin ? (
         <>
           {concerts.length === 0 && (

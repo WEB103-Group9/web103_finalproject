@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import logo from "./assets/sona-logo-tagline.svg";
+import Spinner from "./components/Spinner.jsx";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -135,7 +136,7 @@ function App() {
     [cartItems],
   );
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner />;
 
   if (location.pathname === "/login" || location.pathname === "/onboarding") {
     return <Outlet context={{ user }} />;
@@ -158,10 +159,10 @@ function App() {
           </Link>
 
           <div className="nav-right">
+            <Link to="/feed">My Feed</Link>
             <Link to="/">Artists</Link>
             <Link to="/concerts">Concerts</Link>
             <Link to="/merch">Merch</Link>
-            <Link to="/feed">My Feed</Link>
             <Link to="/cart" className="cart">
               🛒 {cartCount > 0 && <span>({cartCount})</span>}
             </Link>
