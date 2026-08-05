@@ -15,6 +15,10 @@ import orderRoutes from "./routes/orders.js";
 import concertRouter from "./routes/concerts.js";
 import authRouter from "./routes/auth.js";
 import spotifyRouter from "./routes/spotify.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,6 +73,12 @@ app.use("/api/merch", merchRouter);
 app.use("/api/orders", orderRoutes);
 app.use("/api/concerts", concertRouter);
 app.use("/api/spotify", spotifyRouter);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get(/^(?!\/api|\/auth).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 app.listen(PORT, () => {
   console.log(`Sona server running on http://localhost:${PORT}`);
