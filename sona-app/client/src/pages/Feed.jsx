@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { getFeed } from "../api.js";
+import Spinner from "../components/Spinner.jsx";
 
 function FeedItem({ item }) {
   const { type, artist_id, artist_name, artist_photo, data, created_at } = item;
@@ -53,14 +54,14 @@ export default function Feed() {
   return (
     <section>
       <div className="page-header">
-        <h1>Your Feed</h1>
+        <h1>🎶 Welcome, {user.username}!</h1>
         <p className="page-subtitle">
           Everything from artists you follow, in one place.
         </p>
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : feed.length === 0 ? (
         <div className="feed-empty">
           <p>🎵</p>

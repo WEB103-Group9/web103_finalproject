@@ -587,7 +587,8 @@ h1 {
   padding: 4px 12px;
   margin: 14px 14px 8px;
 }
-.genre-tag, .badge {
+.genre-tag,
+.badge {
   display: inline-block;
   background: var(--pill);
   color: #333;
@@ -669,7 +670,7 @@ h1 {
 
 .btn-show {
   background-color: transparent;
-  color: #0B5ED7;
+  color: #0b5ed7;
   border: none;
   width: 100%;
   text-align: center;
@@ -750,14 +751,6 @@ h1 {
   font-size: 12px;
   font-weight: 600;
   color: #333;
-}
-.spotify-embed {
-  display: block;
-  background: var(--muted);
-  border-radius: 6px;
-  padding: 28px 16px;
-  color: var(--text);
-  font-size: 14px;
 }
 .detail-side {
   border: 1px solid var(--border);
@@ -845,6 +838,40 @@ h1 {
   color: var(--text);
 }
 
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 6px solid transparent;
+  border-radius: 50%;
+  background:
+    linear-gradient(white, white) padding-box,
+    conic-gradient(
+        #ffb3ba,
+        #ffdfba,
+        #ffffba,
+        #baffc9,
+        #bae1ff,
+        #d7baff,
+        #ffb3ba
+      )
+      border-box;
+  animation: spin 0.9s linear infinite;
+  margin: 24px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
 .tabs {
   display: flex;
   gap: 40px;
@@ -865,16 +892,60 @@ h1 {
   cursor: not-allowed;
 }
 
+/* Toast */
+
 .toast {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: var(--bar);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: var(--text-h);
+  padding: 14px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #3e8635;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-size: 13.5px;
+  font-weight: 500;
+  z-index: 100;
+  animation: toastIn 0.25s ease-out;
+}
+
+.toast::before {
+  content: "✓";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3e8635;
   color: #fff;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-size: 14px;
-  z-index: 10;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.toast-danger {
+  border-left-color: #c9190b;
+}
+
+.toast-danger::before {
+  content: "✕";
+  background: #c9190b;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .post {
@@ -891,7 +962,8 @@ h1 {
   margin: 0;
 }
 
-.posts-titlebar, .concerts-titlebar {
+.posts-titlebar,
+.concerts-titlebar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -976,7 +1048,6 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 640px;
   margin: 0 auto;
 }
 
@@ -1148,6 +1219,43 @@ h1 {
   font-size: 20px;
 }
 
+.cart-qty-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.qty-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bar);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-count {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
 /* Logout button */
 .logout-btn {
   background-color: #e74c3c;
@@ -1179,7 +1287,7 @@ h1 {
 .concert-admin-view table th {
   font-size: 1.25rem;
   text-align: start;
-  padding: 16px 10px 8px; 
+  padding: 16px 10px 8px;
 }
 
 .concert-admin-view table td {
@@ -1229,4 +1337,33 @@ h1 {
 
 .badge {
   margin: 4px 0;
+}
+
+/* Confetti */
+
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 1.8s ease-in forwards;
+}
+
+@keyframes confettiFall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }

@@ -1,12 +1,16 @@
 import { Link, useOutletContext } from "react-router-dom";
 import { useState } from "react";
 import { createOrder } from "../api.js";
+import Toast from "../components/Toast.jsx";
 
 export default function Cart() {
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const {
     cartItems,
@@ -16,12 +20,41 @@ export default function Cart() {
     cartTotal,
   } = useOutletContext();
 
+  function showToast(message, type = "") {
+    setToast(message);
+    setToastType(type);
+    setTimeout(() => setToast(""), 2000);
+  }
+
   if (successMessage) {
     return (
       <section>
         <h1>Order Confirmation</h1>
         <p className="success-message">{successMessage}</p>
         <Link to="/merch">Continue Shopping</Link>
+        <Toast message={toast} type={toastType} />
+        {showConfetti && (
+          <div className="confetti-container">
+            {Array.from({ length: 40 }).map((_, i) => (
+              <div
+                key={i}
+                className="confetti-piece"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 0.5}s`,
+                  backgroundColor: [
+                    "#ffb3ba",
+                    "#ffdfba",
+                    "#ffffba",
+                    "#baffc9",
+                    "#bae1ff",
+                    "#d7baff",
+                  ][i % 6],
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
     );
   }
@@ -42,7 +75,11 @@ export default function Cart() {
     }
     setOrderSubmitted(true);
     setPlacingOrder(true);
-    setSuccessMessage("");
+    setSuccessMessage("Your order was placed successfully.");
+    showToast("Order placed!");
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+    clearCart();
     setErrorMessage("");
 
     const orderData = {
@@ -58,9 +95,11 @@ export default function Cart() {
       await createOrder(orderData);
 
       setSuccessMessage("Your order was placed successfully.");
+      showToast("Order placed!");
       clearCart();
     } catch (error) {
       setErrorMessage(error.message);
+      showToast("Order failed", "danger");
       setOrderSubmitted(false);
     } finally {
       setPlacingOrder(false);

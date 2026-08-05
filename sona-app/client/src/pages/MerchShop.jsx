@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getMerch, getArtists } from "../api.js";
 import MerchCard from "../components/MerchCard.jsx";
 import { useOutletContext } from "react-router-dom";
+import Spinner from "../components/Spinner.jsx";
 
 export default function MerchShop() {
   const [merch, setMerch] = useState([]);
@@ -11,7 +12,7 @@ export default function MerchShop() {
   const [sort, setSort] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const { addToCart } = useOutletContext()
+  const { addToCart } = useOutletContext();
 
   useEffect(() => {
     getArtists().then(setArtists);
@@ -32,7 +33,9 @@ export default function MerchShop() {
         <select value={artistId} onChange={(e) => setArtistId(e.target.value)}>
           <option value="">All Artists</option>
           {artists.map((artist) => (
-            <option key={artist.id} value={artist.id}>{artist.name}</option>
+            <option key={artist.id} value={artist.id}>
+              {artist.name}
+            </option>
           ))}
         </select>
 
@@ -51,7 +54,7 @@ export default function MerchShop() {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : merch.length === 0 ? (
         <p>No merch found.</p>
       ) : (

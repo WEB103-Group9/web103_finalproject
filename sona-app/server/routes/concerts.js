@@ -48,7 +48,7 @@ router.get("/", async (req, res) => {
             artists.photo AS artist_photo
       FROM cleaned_concert_data
       JOIN artists ON artists.id = cleaned_concert_data.artist_id
-      ORDER BY cleaned_concert_data.created_at ASC`,
+      ORDER BY cleaned_concert_data.date ASC`,
       values,
     );
     res.json(result.rows);

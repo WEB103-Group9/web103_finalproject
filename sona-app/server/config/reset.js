@@ -102,8 +102,8 @@ const createTables = `
     id SERIAL PRIMARY KEY,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
     concert_name VARCHAR(80),
-    venue VARCHAR(50) NOT NULL,
-    city VARCHAR(24) NOT NULL,
+    venue VARCHAR(150),
+    city VARCHAR(50),
     date DATE NOT NULL,
     ticket_link VARCHAR(2083) NOT NULL,
     source VARCHAR(20),
@@ -132,14 +132,13 @@ async function seed() {
     console.log("Seeding artists...");
     const artists = await client.query(`
       INSERT INTO artists (name, genre, photo) VALUES
-        ('Test Artist 1', 'Pop', 'https://picsum.photos/seed/artist1/400/400'),
-        ('Test Artist 2', 'Rock', 'https://picsum.photos/seed/artist2/400/400'),
-        ('Test Artist 3', 'Hip-Hop', 'https://picsum.photos/seed/artist3/400/400'),
-        ('Test Artist 4', 'R&B', 'https://picsum.photos/seed/artist4/400/400'),
-        ('Test Artist 5', 'Indie', 'https://picsum.photos/seed/artist5/400/400'),
-        ('Test Artist 6', 'Electronic', 'https://picsum.photos/seed/artist6/400/400'),
-        ('Test Artist 7', 'Jazz', 'https://picsum.photos/seed/artist7/400/400'),
-        ('Melanie Martinez', 'Pop', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ55NdqWPtfsR4tXLpBbuY4sPjrw7rJRPhjO-3atR0lOSglv1lZRdquYi-5anDdVUv0Sl06F9GnjxW9hpC1ygkQnZiSyQfB3wGtV5lEfs9E&s=10')
+          ('Melanie Martinez', 'Pop', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ55NdqWPtfsR4tXLpBbuY4sPjrw7rJRPhjO-3atR0lOSglv1lZRdquYi-5anDdVUv0Sl06F9GnjxW9hpC1ygkQnZiSyQfB3wGtV5lEfs9E&s=10'),
+          ('Kali Uchis', 'Alternative R&B', 'https://www.papermag.com/media-library/image.jpg?id=60169465'),
+          ('Holywatr', 'Alternative Metal', 'https://www.blackcatdc.com/images/460/holywatr.jpg'),
+          ('Joji', 'Alternative R&B', 'https://pchcorral.com/wp-content/uploads/2018/09/1280x1280-900x900.jpg'),
+          ('BINI', 'P-Pop', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi6n-UeooyveWEQlouFVXZW099t_WGK8TBGGPi1Mnk5NOSO2M3iosmtvg&s=10'),
+          ('SB19', 'P-Pop', 'https://imageio.forbes.com/specials-images/imageserve/6a6d07716da8cd992d573f76/SB19-poses-backstage-following-a-historic-performance-on-day-one-at-Lollapalooza-/960x0.jpg'),
+          ('Don Toliver', 'Hip-Hop', 'https://m.media-amazon.com/images/I/714HSJN-ubL._UF1000,1000_QL80_.jpg')
       RETURNING id, name;
     `);
     const [artist1, artist2, artist3, artist4, artist5, artist6, artist7] =
@@ -154,21 +153,31 @@ async function seed() {
     ($2, 'Poster', 'accessory', 15.00, 'https://picsum.photos/seed/merch4/400/400', 100),
     ($3, 'Snapback Hat', 'apparel', 28.00, 'https://picsum.photos/seed/merch5/400/400', 40),
     ($4, 'Band Tee', 'apparel', 35.00, 'https://picsum.photos/seed/merch6/400/400', 25),
-    ($5, 'Concert Ticket', 'accessory', 50.00, 'https://picsum.photos/seed/merch7/400/400', 10)
+    ($5, 'Concert Lanyard', 'accessory', 50.00, 'https://picsum.photos/seed/merch7/400/400', 10),
+    ($6, 'Light Stick', 'accessory', 60.00, 'https://picsum.photos/seed/merch8/400/400', 10),
+    ($7, 'Signed Vinyl Record', 'accessory', 50.00, 'https://picsum.photos/seed/merch9/400/400', 10)
   `,
-      [artist1.id, artist2.id, artist3.id, artist4.id, artist5.id],
+      [
+        artist1.id,
+        artist2.id,
+        artist3.id,
+        artist4.id,
+        artist5.id,
+        artist6.id,
+        artist7.id,
+      ],
     );
 
     console.log("Seeding profiles...");
     await client.query(
       `INSERT INTO profile (artist_id, description, instagram, twitter, facebook, tiktok, spotify) VALUES
-  ($1, 'Placeholder bio for Test Artist 1.', '@testartist1', '@testartist1', '@testartist1fb', '@testartist1tt', 'https://open.spotify.com/artist/example1'),
-  ($2, 'Placeholder bio for Test Artist 2.', '@testartist2', '@testartist2', '@testartist2fb', '@testartist2tt', 'https://open.spotify.com/artist/example2'),
-  ($3, 'Placeholder bio for Test Artist 3.', '@testartist3', '@testartist3', '@testartist3fb', '@testartist3tt', 'https://open.spotify.com/artist/example3'),
-  ($4, 'Placeholder bio for Test Artist 4.', '@testartist4', '@testartist4', '@testartist4fb', '@testartist4tt', 'https://open.spotify.com/artist/example4'),
-  ($5, 'Placeholder bio for Test Artist 5.', '@testartist5', '@testartist5', '@testartist5fb', '@testartist5tt', 'https://open.spotify.com/artist/example5'),
-  ($6, 'Placeholder bio for Test Artist 6.', '@testartist6', '@testartist6', '@testartist6fb', '@testartist6tt', 'https://open.spotify.com/artist/example6'),
-  ($7, 'Placeholder bio for Test Artist 7.', '@testartist7', '@testartist7', '@testartist7fb', '@testartist7tt', 'https://open.spotify.com/artist/example7')
+  ($1, 'Singer, songwriter, and visual artist known for cinematic, theatrical pop.', '@melaniemartinez', '@littlebodybigheart', '@melaniemartinez', '@melaniemartinez', 'https://open.spotify.com/artist/63yrD80RY3RNEM2YDpUpO8'),
+  ($2, 'Colombian-American singer blending R&B, reggaeton, and dream pop.', '@kaliuchis', '@kaliuchis', '@kaliuchis', '@kaliuchis', 'https://open.spotify.com/artist/1U1el3k54VvEUzo3ybLPlM'),
+  ($3, 'Alternative metal outfit known for a gritty, genre-blurring sound.', '@holywatr', '@holywatr', '@holywatr', '@holywatr', 'https://open.spotify.com/artist/0muUUrVzG2eMabJN2UHtZB'),
+  ($4, 'Japanese-Australian singer, songwriter, record producer, and former internet personality.', '@sushitrash', '@joji', '@joji', '@joji', 'https://open.spotify.com/artist/3MZsBdqDrRTJihTHQrO6Dq'),
+  ($5, 'P-Pop girl group known for high-energy performances.', '@bini_ph', '@bini_ph', '@bini_ph', '@bini_ph', 'https://open.spotify.com/artist/7tNO3vJC9zlHy2IJOx34ga'),
+  ($6, 'P-Pop boy group blending dance-pop and hip-hop influences.', '@sb19official', '@SB19Official', '@SB19Official', '@sb19official', 'https://open.spotify.com/artist/3g7vYcdDXnqnDKYFwqXBJP'),
+  ($7, 'Houston-born artist known for melodic trap and R&B-infused hip-hop.', '@dontoliver', '@dontoliver', '@dontoliver', '@dontoliver', 'https://open.spotify.com/artist/4Gso3d4CscCijv0lmajZWs')
       `,
       [
         artist1.id,
@@ -196,16 +205,30 @@ async function seed() {
     console.log("Seeding posts...");
     await client.query(
       `INSERT INTO posts (artist_id, content) VALUES
-        ($1, 'Placeholder post from Test Artist 1.'),
-        ($2, 'Placeholder post from Test Artist 2.'),
-        ($3, 'Placeholder post from Test Artist 3.')
+        ($1, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($2, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($3, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($4, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($5, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($6, 'Follow me for updates on my upcoming tour and new music releases!'),
+        ($7, 'Follow me for updates on my upcoming tour and new music releases!')
       `,
-      [artist1.id, artist2.id, artist3.id],
+      [
+        artist1.id,
+        artist2.id,
+        artist3.id,
+        artist4.id,
+        artist5.id,
+        artist6.id,
+        artist7.id,
+      ],
     );
 
     console.log("Seeding Ticketmaster Discovery API concerts...");
     await syncArtistConcerts();
 
+    {
+      /* Using ticketmaster api to seed concerts
     console.log("Seeding concerts manually");
     await client.query(
       `INSERT INTO concerts (artist_id, venue, city, date, ticket_link, source) VALUES
@@ -216,6 +239,8 @@ async function seed() {
       `,
       [artist1.id, artist2.id, artist3.id],
     );
+    */
+    }
 
     console.log("✅ Database reset and seeded successfully.");
   } catch (err) {

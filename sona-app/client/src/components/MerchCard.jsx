@@ -10,7 +10,8 @@ export default function MerchCard({
   onDeleted,
   addToCart,
 }) {
-  const { user } = useOutletContext();
+  const { user, cartItems, updateCartQuantity, removeFromCart } =
+    useOutletContext();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: merch.name,
@@ -22,6 +23,8 @@ export default function MerchCard({
   const [submitting, setSubmitting] = useState(false);
 
   const isOutOfStock = Number(merch.stock) <= 0;
+  const cartItem = cartItems.find((item) => item.id === merch.id);
+  const cartQuantity = cartItem?.quantity ?? 0;
 
   async function handleDelete() {
     if (!confirm(`Delete ${merch.name}?`)) return;
@@ -120,14 +123,41 @@ export default function MerchCard({
         <span className="genre-tag">{merch.type}</span>
 
         <div className="card-actions">
-          <button
-            type="button"
-            className="btn-outline"
-            onClick={() => addToCart(merch)}
-            disabled={isOutOfStock}
-          >
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-          </button>
+          {cartQuantity > 0 ? (
+            <div className="cart-qty-control">
+              <button
+                type="button"
+                className="qty-btn"
+                onClick={() => {
+                  if (cartQuantity <= 1) {
+                    removeFromCart(merch.id);
+                  } else {
+                    updateCartQuantity(merch.id, cartQuantity - 1);
+                  }
+                }}
+              >
+                −
+              </button>
+              <span className="qty-count">{cartQuantity}</span>
+              <button
+                type="button"
+                className="qty-btn"
+                onClick={() => updateCartQuantity(merch.id, cartQuantity + 1)}
+                disabled={cartQuantity >= merch.stock}
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn-outline"
+              onClick={() => addToCart(merch)}
+              disabled={isOutOfStock}
+            >
+              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            </button>
+          )}
           <span className="price-tag">${Number(merch.price).toFixed(2)}</span>
         </div>
 

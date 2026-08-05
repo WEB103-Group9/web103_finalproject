@@ -41,9 +41,9 @@ export default function Onboarding() {
 
       const data = await res.json();
       if (data.artistId) {
-        window.location.href = `/artists/${data.artistId}`;
+        window.location.href = `/artists/${data.artistId}`; // artist account path
       } else {
-        window.location.href = "/";
+        window.location.href = "/feed"; // fan account path
       }
     } catch (err) {
       setError(err.message);

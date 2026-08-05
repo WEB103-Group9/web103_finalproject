@@ -1,7 +1,21 @@
-import "../index.css";
+function getSpotifyEmbedUrl(spotifyUrl) {
+  if (!spotifyUrl) return null;
+  try {
+    const url = new URL(spotifyUrl);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    if (pathParts.length < 2) return null;
+    const [type, id] = pathParts;
+    if (!["artist", "track", "album", "playlist"].includes(type)) return null;
+    return `https://open.spotify.com/embed/${type}/${id}`;
+  } catch {
+    return null;
+  }
+}
 
 export default function QuickViewPanel({ artist, onClose }) {
   if (!artist) return null;
+
+  const embedUrl = getSpotifyEmbedUrl(artist.spotify);
 
   return (
     <>
@@ -18,36 +32,37 @@ export default function QuickViewPanel({ artist, onClose }) {
 
         <div className="qv-socials">
           {artist.instagram && (
-            <a href={artist.instagram} target="_blank" rel="nonreferrer">
+            <a href={artist.instagram} target="_blank" rel="noreferrer">
               Instagram
             </a>
           )}
           {artist.twitter && (
-            <a href={artist.twitter} target="_blank" rel="nonreferrer">
+            <a href={artist.twitter} target="_blank" rel="noreferrer">
               X
             </a>
           )}
           {artist.facebook && (
-            <a href={artist.facebook} target="_blank" rel="nonreferrer">
+            <a href={artist.facebook} target="_blank" rel="noreferrer">
               Facebook
             </a>
           )}
           {artist.tiktok && (
-            <a href={artist.tiktok} target="_blank" rel="nonreferrer">
+            <a href={artist.tiktok} target="_blank" rel="noreferrer">
               TikTok
             </a>
           )}
         </div>
 
-        {artist.spotify && (
+        {embedUrl && (
           <iframe
             className="qv-spotify"
-            src={artist.spotify}
+            src={embedUrl}
             width="100%"
-            height="80"
-            allow="autoplay; clipboard-write; encrypted-media; full-screen; picture-in-picture"
+            height="152"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
-          />
+          ></iframe>
         )}
 
         <a href={`/artists/${artist.id}`} className="qv-full-profile">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { followArtist, unfollowArtist } from "../api.js";
+import Toast from "./Toast.jsx";
 
 export default function FollowButton({
   artistId,
@@ -11,9 +12,11 @@ export default function FollowButton({
   const [following, setFollowing] = useState(initialFollowing);
   const [notify, setNotify] = useState(initialNotify);
   const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("");
 
-  function showToast(message) {
+  function showToast(message, type = "") {
     setToast(message);
+    setToastType(type);
     setTimeout(() => setToast(""), 2000);
   }
 
@@ -23,14 +26,14 @@ export default function FollowButton({
         await unfollowArtist(user.id, artistId);
         setFollowing(false);
         setNotify(false);
-        showToast("Unfollowed");
+        showToast("Unfollowed", "danger");
       } else {
         await followArtist(user.id, artistId, notify);
         setFollowing(true);
         showToast("Following");
       }
     } catch {
-      showToast("Something went wrong");
+      showToast("Something went wrong", "danger");
     }
   }
 
@@ -57,7 +60,7 @@ export default function FollowButton({
         </label>
       )}
 
-      {toast && <span className="toast">{toast}</span>}
+      <Toast message={toast} type={toastType} />
     </>
   );
 }
