@@ -23,6 +23,7 @@ import FollowButton from "../components/FollowButton.jsx";
 import ArtistAbout from "../components/ArtistAbout.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
+import Spinner from "../components/Spinner.jsx";
 import Toast from "../components/Toast.jsx";
 
 export default function ArtistDetail() {
@@ -37,6 +38,7 @@ export default function ArtistDetail() {
   const [posts, setPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("");
   const [merch, setMerch] = useState([]);
   const [merchLoading, setMerchLoading] = useState(true);
   const [showCreateMerch, setShowCreateMerch] = useState(false);
@@ -81,7 +83,7 @@ export default function ArtistDetail() {
     }
   }, [new_post, searchParams, setSearchParams]);
 
-  if (!artist || following === null) return <p>Loading...</p>;
+  if (!artist || following === null) return <Spinner />;
 
   async function handleDelete() {
     if (!confirm(`Delete ${artist.name}?`)) return;
@@ -93,8 +95,9 @@ export default function ArtistDetail() {
     }
   }
 
-  function showToast(message) {
+  function showToast(message, type = "") {
     setToast(message);
+    setToastType(type);
     setTimeout(() => setToast(""), 2000);
   }
 
@@ -192,7 +195,7 @@ export default function ArtistDetail() {
                 }}
                 onDeleted={(deletedId) => {
                   setPosts((prev) => prev.filter((p) => p.id !== deletedId));
-                  showToast("Post deleted");
+                  showToast("Post deleted", "danger");
                 }}
               />
             ))
@@ -222,15 +225,14 @@ export default function ArtistDetail() {
             onCreated={(created) => {
               setMerch((prev) => [created, ...prev]);
               setShowCreateMerch(false);
-              setToast("Merch created!");
-              setTimeout(() => setToast(""), 3000);
+              showToast("Merch created!");
             }}
             onCancel={() => setShowCreateMerch(false)}
           />
         )}
 
         {merchLoading ? (
-          <p>Loading...</p>
+          <Spinner />
         ) : merch.length === 0 ? (
           <p className="placeholder">No merch yet.</p>
         ) : (
@@ -250,6 +252,7 @@ export default function ArtistDetail() {
                   }}
                   onDeleted={(deletedId) => {
                     setMerch((prev) => prev.filter((m) => m.id !== deletedId));
+                    showToast("Merch deleted", "danger");
                   }}
                 />
               ))}
@@ -260,8 +263,7 @@ export default function ArtistDetail() {
           </>
         )}
       </section>
-
-      {toast && <span className="toast">{toast}</span>}
+      <Toast message={toast} type={toastType} />
     </article>
   );
 }
