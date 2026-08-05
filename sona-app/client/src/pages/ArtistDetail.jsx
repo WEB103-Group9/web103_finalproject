@@ -152,7 +152,7 @@ export default function ArtistDetail() {
 
       <div className="detail-grid">
         <ArtistAbout artist={artist} />
-        <ArtistConcertsList artistId={id} />
+        <ArtistConcertsList artistId={id} isAdmin={isAdmin} />
       </div>
 
       <section>
