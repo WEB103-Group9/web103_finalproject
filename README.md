@@ -11,7 +11,7 @@ Designed and developed by:
 - Carolina Herrera
 - Armin Erika Polanco
 
-🔗 Link to deployed app:
+🔗 [Sona - Live App](https://sona-app-hhq3.onrender.com/)
 
 ## About
 
@@ -31,6 +31,8 @@ This project builds on ideas from several of our previous coursework projects. M
 - Backend: Express, Node.js, PostgreSQL
 - Auth: Passport.js, GitHub OAuth
 - Image Storage: Cloudinary
+- Music Data: Ticketmaster Discovery API, Spotify Web API
+- Deployment: Render
 
 ## Features
 
@@ -108,24 +110,96 @@ This project builds on ideas from several of our previous coursework projects. M
 
 - ![Cloud Image Upload](https://i.imgur.com/yeb6qKU.gif)
 
-### (Stretch) Spotify Connect
+### ✅ Spotify Artist Embeds
+
+- Artists can add their own Spotify link, which renders as a real, playable embedded player on their profile and Quick View panel.
+
+-![Spotify Artist Embeds](https://i.imgur.com/X6T3gYf.gif)
+
+## Coming Next
+
+### (Stretch) Spotify Fan Account Connect
 
 - Link a Spotify account to import playlists and generate personalized recommendations.
-
-- ![gif goes here]()
 
 ### (Stretch) Sona Mix
 
 - Auto-generate a custom playlist from the artists you follow, featured right on your profile.
 
-- ![gif goes here]()
-
 ### (Stretch) Real Payment Integration
 
 - Real checkout system built on top of the existing order system.
 
-- ![gif goes here]()
-
 ## Installation Instructions
 
-[instructions go here]
+1.) Clone the repo and navigate into it:
+
+```bash
+   git clone <repo-url>
+   cd web103_finalproject/sona-app
+```
+
+2.) Install dependencies for both the client and server:
+
+```bash
+   cd client && npm install
+   cd ../server && npm install
+```
+
+3.) Create a PostgreSQL database (locally or with a hosted provider like Render or ElephantSQL).
+
+4.) Set up environment variables:
+
+- In `server/.env`, add:
+
+```bash
+   PGUSER=your_postgres_username
+   PGHOST=your_postgres_host
+   PGDATABASE=your_database_name
+   PGPASSWORD=your_postgres_password
+   PGPORT=5432
+   GITHUB_CLIENT_ID=your_github_oauth_client_id
+   GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+   TICKETMASTER_API_KEY=your_ticketmaster_api_key
+   SPOTIFY_CLIENT_ID=your_spotify_client_id
+   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+   SPOTIFY_REDIRECT_URI=http://127.0.0.1:3001/api/spotify/callback
+   SESSION_SECRET=any_random_string
+   SERVER_URL=http://localhost:3001
+   CLIENT_URL=http://localhost:5173
+```
+
+- In `client/.env`, add:
+
+```bash
+   VITE_API_URL=http://localhost:3001
+   VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your_cloudinary_unsigned_upload_preset
+```
+
+- To get these credentials:
+  - **GitHub OAuth**: register a new OAuth App at [github.com/settings/developers](https://github.com/settings/developers). Set the Homepage URL to `http://localhost:5173` and the Authorization callback URL to `http://localhost:3001/auth/github/callback`.
+  - **Ticketmaster API key**: register at [developer.ticketmaster.com](https://developer.ticketmaster.com/).
+  - **Spotify**: register a new app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard). Add `http://127.0.0.1:3001/api/spotify/callback` as a Redirect URI, and select the Web API.
+  - **Cloudinary**: create a free account at [cloudinary.com](https://cloudinary.com/), then create an unsigned upload preset under Settings → Upload.
+
+    5.) Reset and seed the database:
+
+```bash
+   cd server
+   npm run reset-db
+```
+
+6.) Run the app locally (two terminals):
+
+```bash
+   # Terminal 1 — server
+   cd server
+   npm run dev
+
+   # Terminal 2 — client
+   cd client
+   npm run dev
+```
+
+- The app will be available at `http://localhost:5173`.
