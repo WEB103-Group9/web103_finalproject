@@ -27,14 +27,28 @@ router.get("/", async (req, res) => {
       }
     }
 
-    const where = conditions.length ? `WHERE ${conditions.join(" OR ")}` : ``;
+    conditions.push(`row_num = 1`);
+    const where = `WHERE ${conditions.join(" OR ")}`;
 
     const result = await pool.query(
-      `SELECT concerts.*, artists.name AS artist_name, artists.photo AS artist_photo
-           FROM concerts
-           JOIN artists ON artists.id = concerts.artist_id
-           ${where}
-           ORDER BY concerts.date ASC`,
+      `WITH cleaned_concert_data AS (
+        SELECT *,
+              ROW_NUMBER() OVER (
+                PARTITION BY
+                  artist_id,
+                  date,
+                  REGEXP_REPLACE(LOWER(TRIM(venue)), '[^a-z0-9]', '', 'g')
+                ORDER BY REGEXP_REPLACE(concert_name, '[^a-z0-9]', '', 'g') ASC
+              ) AS row_num
+        FROM concerts
+      )
+
+      SELECT cleaned_concert_data.*,
+            artists.name AS artist_name,
+            artists.photo AS artist_photo
+      FROM cleaned_concert_data
+      JOIN artists ON artists.id = cleaned_concert_data.artist_id
+      ORDER BY cleaned_concert_data.created_at ASC`,
       values,
     );
     res.json(result.rows);
